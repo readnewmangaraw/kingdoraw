@@ -96,49 +96,63 @@ async function uploadGitHubFile(
   message
 ){
 
+  const auth =
+    window.KINGDOM_AUTH;
+
+  if(!auth){
+    throw new Error(
+      "GitHub authentication system is not loaded."
+    );
+  }
+
   const token =
-    window.KINGDOM_AUTH.getToken();
-
-  const owner =
-    window.KINGDOM_AUTH.getRepository().owner;
-
-  const repo =
-    window.KINGDOM_AUTH.getRepository().repo;
-
+    auth.getToken();
 
   if(!token){
-
     throw new Error(
-      "GitHub is not connected."
+      "GitHub token is missing."
     );
-
   }
 
+  const repository =
+    auth.getRepository();
 
-  if(!owner || !repo){
+  const encodedPath =
+    path
+      .split("/")
+      .map(
+        part => encodeURIComponent(part)
+      )
+      .join("/");
 
-    throw new Error(
-      "GitHub repository information is missing."
-    );
-
-  }
+  const apiUrl =
+    "https://api.github.com/repos/" +
+    repository.owner +
+    "/" +
+    repository.repo +
+    "/contents/" +
+    encodedPath;
 
 
   /*
-   * Check whether the file already exists.
-   * 404 is NORMAL when creating a new file.
+   * Check existing file.
+   *
+   * 200 = file exists
+   * 404 = new file, which is NORMAL
    */
 
-  const checkResponse =
+  const check =
     await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=main`,
+      apiUrl + "?ref=main",
       {
-        headers:{
+        method: "GET",
+
+        headers: {
           "Accept":
             "application/vnd.github+json",
 
           "Authorization":
-            `Bearer ${token}`,
+            "Bearer " + token,
 
           "X-GitHub-Api-Version":
             "2022-11-28"
@@ -150,43 +164,47 @@ async function uploadGitHubFile(
   let sha = null;
 
 
-  if(
-    checkResponse.status === 200
-  ){
+  if(check.status === 200){
 
     const existing =
-      await checkResponse.json();
+      await check.json();
 
     sha =
       existing.sha;
 
   }
-  else if(
-    checkResponse.status !== 404
-  ){
+  else if(check.status !== 404){
 
-    const errorText =
-      await checkResponse.text();
+    let errorText = "";
+
+    try{
+      errorText =
+        await check.text();
+    }catch{}
 
     throw new Error(
-      `GitHub file check failed: ${checkResponse.status} ${errorText}`
+      "GitHub file check failed: " +
+      check.status +
+      " " +
+      errorText
     );
 
   }
 
 
   /*
-   * Create or update the file.
+   * Create or update file.
    */
 
   const body = {
+    message:
+      message,
 
-    message,
+    content:
+      base64,
 
-    content: base64,
-
-    branch: "main"
-
+    branch:
+      "main"
   };
 
 
@@ -198,18 +216,18 @@ async function uploadGitHubFile(
   }
 
 
-  const response =
+  const upload =
     await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+      apiUrl,
       {
-        method:"PUT",
+        method: "PUT",
 
-        headers:{
+        headers: {
           "Accept":
             "application/vnd.github+json",
 
           "Authorization":
-            `Bearer ${token}`,
+            "Bearer " + token,
 
           "X-GitHub-Api-Version":
             "2022-11-28",
@@ -220,21 +238,29 @@ async function uploadGitHubFile(
 
         body:
           JSON.stringify(body)
-
       }
     );
 
 
-  if(!response.ok){
+  if(!upload.ok){
 
-    const errorText =
-      await response.text();
+    let errorText = "";
+
+    try{
+      errorText =
+        await upload.text();
+    }catch{}
 
     throw new Error(
-      `Upload failed: ${response.status} ${errorText}`
+      "GitHub upload failed: " +
+      upload.status +
+      " " +
+      errorText
     );
 
   }
+
+  return true;
 
 }
 
