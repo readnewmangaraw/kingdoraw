@@ -502,7 +502,10 @@ class="status"
 
 <!-- SITE SETTINGS -->
 
-<div class="panel">
+<div
+id="siteSettingsPanel"
+class="panel tab-panel"
+>
 
 <h2>Website Settings</h2>
 
@@ -571,11 +574,42 @@ class="status"
 
 </div>
 
+
+<!-- ADMIN TABS -->
+
+<div class="admin-tabs">
+
+<button
+type="button"
+class="admin-tab active"
+data-target="publisherPanel"
+>
+New Post
+</button>
+
+<button
+type="button"
+class="admin-tab"
+data-target="postsPanel"
+>
+Update Post
+</button>
+
+<button
+type="button"
+class="admin-tab"
+data-target="siteSettingsPanel"
+>
+Site Settings
+</button>
+
+</div>
+
 <!-- EXISTING POSTS -->
 
 <div
 id="postsPanel"
-class="panel hidden"
+class="panel tab-panel"
 >
 
 <h2>Existing Chapters</h2>
@@ -594,7 +628,7 @@ Loading...
 
 <div
 id="publisherPanel"
-class="panel hidden"
+class="panel tab-panel active-panel"
 >
 
 <h2 id="formTitle">New Chapter</h2>
@@ -755,5 +789,127 @@ Cancel
 <script src="editor.js?v=1787076361"></script>
 <script src="uploader.js?v=1787076361"></script>
 
+
+<style>
+
+.admin-tabs{
+  display:flex;
+  gap:10px;
+  margin:20px 0;
+  flex-wrap:wrap;
+}
+
+.admin-tab{
+  padding:12px 24px;
+  border:1px solid #334155;
+  border-radius:8px;
+  background:#111827;
+  color:#cbd5e1;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.admin-tab:hover{
+  background:#1e293b;
+}
+
+.admin-tab.active{
+  background:#dc2626;
+  border-color:#dc2626;
+  color:#fff;
+}
+
+.tab-panel{
+  display:none;
+}
+
+.tab-panel.active-panel{
+  display:block;
+}
+
+</style>
+
+<script>
+
+(function(){
+
+  function initAdminTabs(){
+
+    const tabs =
+      document.querySelectorAll(
+        ".admin-tab"
+      );
+
+    const panels =
+      document.querySelectorAll(
+        ".tab-panel"
+      );
+
+    if(!tabs.length){
+      return;
+    }
+
+    function openTab(target){
+
+      tabs.forEach(function(tab){
+
+        tab.classList.toggle(
+          "active",
+          tab.dataset.target === target
+        );
+
+      });
+
+      panels.forEach(function(panel){
+
+        panel.classList.toggle(
+          "active-panel",
+          panel.id === target
+        );
+
+      });
+
+    }
+
+    tabs.forEach(function(tab){
+
+      tab.addEventListener(
+        "click",
+        function(){
+
+          openTab(
+            tab.dataset.target
+          );
+
+        }
+      );
+
+    });
+
+    openTab("publisherPanel");
+
+  }
+
+  if(
+    document.readyState === "loading"
+  ){
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initAdminTabs,
+      {once:true}
+    );
+
+  }else{
+
+    initAdminTabs();
+
+  }
+
+})();
+
+</script>
+
 </body>
 </html>
+
