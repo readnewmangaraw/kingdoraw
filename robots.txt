@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://readnewmangaraw.github.io/kingdoraw/sitemap.xml
