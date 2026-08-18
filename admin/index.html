@@ -711,9 +711,6 @@ id="update-post"
 class="tab-content"
 >
 
-
-<!-- EDITOR -->
-
 <div class="panel">
 
 <h2>
@@ -727,13 +724,14 @@ Chapter
 </label>
 
 <select id="postSelect">
-
 <option value="">
 Select a chapter to edit
 </option>
-
 </select>
 
+<div class="grid">
+
+<div>
 
 <label for="editTitle">
 Title
@@ -745,6 +743,9 @@ type="text"
 required
 >
 
+</div>
+
+<div>
 
 <label for="editChapter">
 Chapter
@@ -756,6 +757,9 @@ type="text"
 required
 >
 
+</div>
+
+<div>
 
 <label for="editLanguage">
 Language
@@ -773,46 +777,111 @@ English
 
 </select>
 
+</div>
+
+<div>
 
 <label for="editKeywords">
 Keywords
 </label>
 
-<textarea
+<input
 id="editKeywords"
-placeholder="Keyword 1, Keyword 2, Keyword 3"
-></textarea>
+type="text"
+placeholder="Kingdom Raw, Kingdom Chapter 886"
+>
+
+</div>
+
+</div>
 
 
-<label for="editCover">
-Title Image URL
+<div class="panel">
+
+<h3>
+Title Image
+</h3>
+
+<div
+id="editCoverPreview"
+class="help"
+>
+Select a chapter to load its title image.
+</div>
+
+<label for="editCoverFile">
+Replace Title Image
 </label>
 
 <input
-id="editCover"
-type="text"
-placeholder="images/slug/title.webp"
+id="editCoverFile"
+type="file"
+accept="image/*"
 >
 
+</div>
 
-<label for="editImages">
-Chapter Image URLs
+
+<div class="panel">
+
+<h3>
+Chapter Images
+</h3>
+
+<div
+id="editImageList"
+class="edit-image-list"
+>
+Select a chapter to load its images.
+</div>
+
+<div class="actions">
+
+<label
+for="editNewImages"
+class="secondary"
+style="display:inline-block;cursor:pointer"
+>
+Add New Images
 </label>
 
-<textarea
-id="editImages"
-rows="10"
-placeholder="images/slug/001.webp
-images/slug/002.webp"
-></textarea>
+<input
+id="editNewImages"
+type="file"
+accept="image/*"
+multiple
+style="display:none"
+>
 
+</div>
+
+<div
+id="editNewImageList"
+class="file-list"
+></div>
+
+</div>
+
+
+<div class="actions">
 
 <button
 type="submit"
 class="green"
+id="updateChapterBtn"
 >
 Update Chapter
 </button>
+
+<button
+type="button"
+class="primary"
+id="deleteChapterBtn"
+>
+Delete Chapter
+</button>
+
+</div>
 
 
 <div
