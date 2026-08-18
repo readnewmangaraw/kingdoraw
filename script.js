@@ -180,7 +180,7 @@ function renderChapters(){
 
         <a
           class="chapter-card"
-          href="#/${encodeURIComponent(post.slug)}"
+          href="${encodeURIComponent(post.slug)}"
         >
 
           <div class="card-image">
@@ -238,18 +238,23 @@ ROUTING
 ==============================
 */
 
-function getSlugFromHash(){
+function getSlugFromPath(){
 
-  const hash =
-    location.hash;
+  const base =
+    "/kingdoraw/";
 
-  if(!hash.startsWith("#/")){
+  if(!location.pathname.startsWith(base)){
     return null;
   }
 
-  return decodeURIComponent(
-    hash.slice(2)
-  );
+  const slug =
+    location.pathname.slice(base.length).replace(/^\/+|\/+$/g, "");
+
+  if(!slug){
+    return null;
+  }
+
+  return decodeURIComponent(slug);
 
 }
 
@@ -257,7 +262,7 @@ function getSlugFromHash(){
 function handleRoute(){
 
   const slug =
-    getSlugFromHash();
+    getSlugFromPath();
 
   if(!slug){
 
@@ -284,7 +289,6 @@ function handleRoute(){
   showReader(post);
 
 }
-
 
 function showHome(){
 
@@ -470,10 +474,14 @@ function renderReader(post){
 
       if(older){
 
-        location.hash =
-          `/${encodeURIComponent(
-            older.slug
-          )}`;
+        history.pushState(
+          {},
+          "",
+          "/kingdoraw/" +
+          encodeURIComponent(older.slug)
+        );
+
+        handleRoute();
 
       }
 
@@ -485,10 +493,14 @@ function renderReader(post){
 
       if(newer){
 
-        location.hash =
-          `/${encodeURIComponent(
-            newer.slug
-          )}`;
+        history.pushState(
+          {},
+          "",
+          "/kingdoraw/" +
+          encodeURIComponent(newer.slug)
+        );
+
+        handleRoute();
 
       }
 
@@ -504,7 +516,7 @@ NAVIGATION
 */
 
 window.addEventListener(
-  "hashchange",
+  "popstate",
   handleRoute
 );
 
@@ -513,7 +525,13 @@ backButton.addEventListener(
   "click",
   () => {
 
-    location.hash = "";
+    history.pushState(
+      {},
+      "",
+      "/kingdoraw/"
+    );
+
+    handleRoute();
 
   }
 );
