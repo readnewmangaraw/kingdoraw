@@ -211,32 +211,7 @@
 </footer>
 
 
-<script>
-(function(){
 
-  var path = window.location.pathname;
-  var search = window.location.search;
-
-  if(
-    path.startsWith("/kingdoraw/") &&
-    path !== "/kingdoraw/"
-  ){
-
-    sessionStorage.setItem(
-      "kingdom_route",
-      path.slice("/kingdoraw/".length) + search
-    );
-
-    history.replaceState(
-      {},
-      "",
-      "/kingdoraw/"
-    );
-
-  }
-
-})();
-</script>
 <script src="script.js"></script>
 
 </body>

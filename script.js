@@ -181,6 +181,7 @@ function renderChapters(){
         <a
           class="chapter-card"
           href="/kingdoraw/${encodeURIComponent(post.slug)}"
+          onclick="event.preventDefault(); history.pushState({}, '', '/kingdoraw/' + encodeURIComponent('${post.slug}')); handleRoute();"
         >
 
           <div class="card-image">
@@ -350,7 +351,6 @@ function handleRoute(){
   showReader(post);
 
 }
-
 
 function showHome(){
 
