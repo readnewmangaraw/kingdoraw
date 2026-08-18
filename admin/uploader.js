@@ -97,15 +97,13 @@ async function uploadGitHubFile(
 ){
 
   const token =
-    localStorage.getItem(
-      "kingdom_github_token"
-    );
+    window.KINGDOM_AUTH.getToken();
 
   const owner =
-    window.GITHUB_OWNER;
+    window.KINGDOM_AUTH.getRepository().owner;
 
   const repo =
-    window.GITHUB_REPO;
+    window.KINGDOM_AUTH.getRepository().repo;
 
 
   if(!token){
