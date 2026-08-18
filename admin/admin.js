@@ -1,43 +1,13 @@
 const BRANCH = "main";
 
-function getRepositoryInfo() {
-  const host = location.hostname;
-  const path = location.pathname;
+const tokenInput =
+  document.getElementById("githubToken");
 
-  const parts = host.split(".");
+const connectBtn =
+  document.getElementById("connectBtn");
 
-  if (host.endsWith(".github.io") && parts.length >= 3) {
-    const owner = parts[0];
-
-    const cleanPath = path
-      .replace(/^\/+/, "")
-      .split("/")[0];
-
-    if (cleanPath) {
-      return {
-        owner,
-        repo: cleanPath
-      };
-    }
-
-    return {
-      owner,
-      repo: `${owner}.github.io`
-    };
-  }
-
-  throw new Error(
-    "Unable to detect the GitHub repository."
-  );
-}
-
-const REPOSITORY = getRepositoryInfo();
-const OWNER = REPOSITORY.owner;
-const REPO = REPOSITORY.repo;
-
-const tokenInput = document.getElementById("githubToken");
-const connectBtn = document.getElementById("connectBtn");
-const logoutBtn = document.getElementById("logoutBtn");
+const logoutBtn =
+  document.getElementById("logoutBtn");
 
 const connectionStatus =
   document.getElementById("connectionStatus");
@@ -98,195 +68,128 @@ let editingSlug = null;
 let manualSlug = false;
 
 
-async function githubApi(path, options = {}) {
+function github(path, options = {}){
 
-  const token = getToken();
-
-  if (!token) {
-    throw new Error("GitHub token is missing.");
-  }
-
-  const response = await fetch(
-    `https://api.github.com/repos/${OWNER}/${REPO}${path}`,
-    {
-      ...options,
-      headers: {
-        "Accept": "application/vnd.github+json",
-        "Authorization": `Bearer ${token}`,
-        "X-GitHub-Api-Version": "2022-11-28",
-        ...(options.headers || {})
-      }
-    }
-  );
-
-  if (!response.ok) {
-
-    let message =
-      response.statusText;
-
-    try {
-
-      const data =
-        await response.json();
-
-      if (data.message) {
-        message =
-          data.message;
-      }
-
-    } catch {}
+  if(
+    typeof window.githubApi !==
+    "function"
+  ){
 
     throw new Error(
-      `GitHub API ${response.status}: ${message}`
+      "GitHub authentication system is not loaded."
     );
+
   }
 
-  return response;
-}
-
-
-/*
-========================================
-TOKEN
-========================================
-*/
-
-function getToken() {
-  return sessionStorage.getItem("kingdom_github_token") || "";
-}
-
-function setToken(value) {
-  sessionStorage.setItem(
-    "kingdom_github_token",
-    value
+  return window.githubApi(
+    path,
+    options
   );
+
 }
 
-function clearToken() {
-  sessionStorage.removeItem(
+
+function getToken(){
+
+  if(
+    typeof window.getToken ===
+    "function"
+  ){
+
+    return window.getToken();
+
+  }
+
+  return localStorage.getItem(
     "kingdom_github_token"
-  );
-}
-
-
-/*
-========================================
-GITHUB API
-========================================
-*/
-
-async function github(path, options = {}) {
-
-  return githubApi(path, options);
+  ) || "";
 
 }
 
 
+function showConnectionSuccess(
+  message
+){
 
-/*
-========================================
-CONNECT
-========================================
-*/
-
-connectBtn.addEventListener("click", async () => {
-
-  const token =
-    tokenInput.value.trim();
-
-  if (!token) {
-    showConnectionError(
-      "Enter your GitHub token."
-    );
+  if(!connectionStatus)
     return;
-  }
 
-  try {
+  connectionStatus.textContent =
+    message;
 
-    sessionStorage.setItem(
-      "kingdom_github_token",
-      token
-    );
+  connectionStatus.className =
+    "status success";
 
-    await github("/contents/data/posts.json");
-
-    showConnectionSuccess(
-      "GitHub connected successfully."
-    );
-
-    tokenInput.value = "";
-
-    connectBtn.classList.add("hidden");
-    logoutBtn.classList.remove("hidden");
-
-    postsPanel.classList.remove("hidden");
-    publisherPanel.classList.remove("hidden");
-
-    await loadPosts();
-
-  } catch (error) {
-
-    clearToken();
-
-    showConnectionError(
-      error.message
-    );
-
-  }
-
-});
+}
 
 
-/*
-========================================
-AUTO CONNECT FROM SESSION
-========================================
-*/
+function showConnectionError(
+  message
+){
 
-window.addEventListener("DOMContentLoaded", async () => {
-
-  if (!getToken()) {
+  if(!connectionStatus)
     return;
-  }
 
-  try {
+  connectionStatus.textContent =
+    message;
 
-    await github("/contents/data/posts.json");
+  connectionStatus.className =
+    "status error";
 
-    connectBtn.classList.add("hidden");
-    logoutBtn.classList.remove("hidden");
+}
 
-    postsPanel.classList.remove("hidden");
-    publisherPanel.classList.remove("hidden");
 
-    await loadPosts();
+function updateAdminAfterLogin(){
 
-    showConnectionSuccess(
-      "GitHub session restored."
+  if(postsPanel)
+    postsPanel.classList.remove(
+      "hidden"
     );
 
-  } catch {
+  if(publisherPanel)
+    publisherPanel.classList.remove(
+      "hidden"
+    );
 
-    clearToken();
+}
+
+
+window.addEventListener(
+  "github-connected",
+  async () => {
+
+    updateAdminAfterLogin();
+
+    try{
+
+      await loadPosts();
+
+    }catch(error){
+
+      console.error(error);
+
+    }
 
   }
+);
 
-});
 
+window.addEventListener(
+  "github-disconnected",
+  () => {
 
-/*
-========================================
-LOGOUT
-========================================
-*/
+    if(postsPanel)
+      postsPanel.classList.add(
+        "hidden"
+      );
 
-logoutBtn.addEventListener("click", () => {
+    if(publisherPanel)
+      publisherPanel.classList.add(
+        "hidden"
+      );
 
-  clearToken();
-
-  location.reload();
-
-});
+  }
+);
 
 
 /*

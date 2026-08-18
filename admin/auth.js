@@ -1,12 +1,30 @@
 const TOKEN_KEY = "kingdom_github_token";
 
+const tokenInput =
+  document.getElementById("githubToken");
+
+const connectBtn =
+  document.getElementById("connectBtn");
+
+const logoutBtn =
+  document.getElementById("logoutBtn");
+
+const connectionStatus =
+  document.getElementById("connectionStatus");
+
+
 function getToken(){
-  return localStorage.getItem(TOKEN_KEY);
+  return localStorage.getItem(TOKEN_KEY) || "";
 }
 
+
 function setToken(token){
-  localStorage.setItem(TOKEN_KEY, token);
+  localStorage.setItem(
+    TOKEN_KEY,
+    token
+  );
 }
+
 
 function clearToken(){
   localStorage.removeItem(TOKEN_KEY);
@@ -14,118 +32,108 @@ function clearToken(){
   localStorage.removeItem("github_repo");
 }
 
-async function githubRequest(url, options = {}){
 
-  const token = getToken();
+function detectRepository(){
+
+  const host =
+    location.hostname;
+
+  const parts =
+    location.pathname
+      .split("/")
+      .filter(Boolean);
+
+  if(
+    host.endsWith(".github.io") &&
+    parts.length >= 1
+  ){
+
+    return {
+      owner:
+        host.replace(".github.io",""),
+
+      repo:
+        parts[0]
+    };
+
+  }
+
+  throw new Error(
+    "GitHub repository could not be detected."
+  );
+}
+
+
+const repository =
+  detectRepository();
+
+
+const OWNER =
+  repository.owner;
+
+const REPO =
+  repository.repo;
+
+
+window.GITHUB_OWNER =
+  OWNER;
+
+window.GITHUB_REPO =
+  REPO;
+
+
+async function githubApi(
+  path,
+  options = {}
+){
+
+  const token =
+    getToken();
 
   if(!token){
-    throw new Error("Please connect GitHub first.");
+
+    throw new Error(
+      "GitHub token is missing."
+    );
+
   }
 
-  return fetch(url,{
-    ...options,
-    headers:{
-      "Accept":"application/vnd.github+json",
-      "Authorization":`Bearer ${token}`,
-      "X-GitHub-Api-Version":"2022-11-28",
-      ...(options.headers || {})
-    }
-  });
-}
 
-async function verifyToken(token){
+  const response =
+    await fetch(
+      `https://api.github.com/repos/${OWNER}/${REPO}${path}`,
+      {
+        ...options,
 
-  const response = await fetch(
-    "https://api.github.com/user",
-    {
-      headers:{
-        "Accept":"application/vnd.github+json",
-        "Authorization":`Bearer ${token}`,
-        "X-GitHub-Api-Version":"2022-11-28"
+        headers:{
+          "Accept":
+            "application/vnd.github+json",
+
+          "Authorization":
+            `Bearer ${token}`,
+
+          "X-GitHub-Api-Version":
+            "2022-11-28",
+
+          ...(options.headers || {})
+        }
       }
-    }
-  );
-
-  if(!response.ok){
-    throw new Error("Invalid GitHub token.");
-  }
-
-  return response.json();
-}
-
-async function verifyRepository(token){
-
-  const owner = window.GITHUB_OWNER;
-  const repo = window.GITHUB_REPO;
-
-  if(!owner || !repo){
-    throw new Error(
-      "GitHub repository could not be detected."
     );
-  }
 
-  const response = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}`,
-    {
-      headers:{
-        "Accept":"application/vnd.github+json",
-        "Authorization":`Bearer ${token}`,
-        "X-GitHub-Api-Version":"2022-11-28"
-      }
-    }
-  );
-
-  if(!response.ok){
-    throw new Error(
-      "Token cannot access this repository."
-    );
-  }
-
-  const data = await response.json();
-
-  localStorage.setItem(
-    "github_owner",
-    data.owner.login
-  );
-
-  localStorage.setItem(
-    "github_repo",
-    data.name
-  );
-
-  return data;
-}
-
-window.githubApi = async function(path, options = {}){
-
-  const owner =
-    localStorage.getItem("github_owner") ||
-    window.GITHUB_OWNER;
-
-  const repo =
-    localStorage.getItem("github_repo") ||
-    window.GITHUB_REPO;
-
-  if(!owner || !repo){
-    throw new Error(
-      "GitHub repository could not be detected."
-    );
-  }
-
-  const response = await githubRequest(
-    `https://api.github.com/repos/${owner}/${repo}${path}`,
-    options
-  );
 
   if(!response.ok){
 
-    let message = response.statusText;
+    let message =
+      response.statusText;
 
     try{
-      const data = await response.json();
+
+      const data =
+        await response.json();
 
       if(data.message){
-        message = data.message;
+        message =
+          data.message;
       }
 
     }catch{}
@@ -133,185 +141,353 @@ window.githubApi = async function(path, options = {}){
     throw new Error(
       `GitHub API ${response.status}: ${message}`
     );
+
   }
 
+
   return response;
-};
 
-const tokenForm =
-  document.getElementById("tokenForm");
-
-const tokenInput =
-  document.getElementById("githubToken");
-
-const tokenStatus =
-  document.getElementById("tokenStatus");
-
-const logoutButton =
-  document.getElementById("logoutButton");
-
-const repositoryInfo =
-  document.getElementById("repositoryInfo");
-
-function updateRepositoryInfo(){
-
-  if(!repositoryInfo) return;
-
-  const owner =
-    localStorage.getItem("github_owner") ||
-    window.GITHUB_OWNER ||
-    "";
-
-  const repo =
-    localStorage.getItem("github_repo") ||
-    window.GITHUB_REPO ||
-    "";
-
-  repositoryInfo.textContent =
-    owner && repo
-      ? `${owner}/${repo}`
-      : "Repository not detected.";
 }
 
-function updateAuthUI(connected){
 
-  if(!tokenForm || !logoutButton) return;
+window.githubApi =
+  githubApi;
+
+
+window.github =
+  githubApi;
+
+
+function showSuccess(message){
+
+  if(!connectionStatus)
+    return;
+
+  connectionStatus.textContent =
+    message;
+
+  connectionStatus.className =
+    "status success";
+
+}
+
+
+function showError(message){
+
+  if(!connectionStatus)
+    return;
+
+  connectionStatus.textContent =
+    message;
+
+  connectionStatus.className =
+    "status error";
+
+}
+
+
+function updateUI(
+  connected,
+  username = ""
+){
+
+  if(!connectBtn || !logoutBtn)
+    return;
+
 
   if(connected){
 
-    tokenForm.classList.add("hidden");
-    logoutButton.classList.remove("hidden");
+    connectBtn.classList.add(
+      "hidden"
+    );
+
+    logoutBtn.classList.remove(
+      "hidden"
+    );
+
+    showSuccess(
+      `✓ Connected as @${username} | Repository: ${OWNER}/${REPO}`
+    );
 
   }else{
 
-    tokenForm.classList.remove("hidden");
-    logoutButton.classList.add("hidden");
+    connectBtn.classList.remove(
+      "hidden"
+    );
 
-  }
-}
+    logoutBtn.classList.add(
+      "hidden"
+    );
 
-async function connectGitHub(token){
+    if(connectionStatus){
 
-  tokenStatus.textContent =
-    "Checking GitHub access...";
+      connectionStatus.textContent =
+        "Not connected.";
 
-  const user =
-    await verifyToken(token);
+      connectionStatus.className =
+        "status";
 
-  await verifyRepository(token);
-
-  setToken(token);
-
-  tokenStatus.textContent =
-    `Connected as @${user.login}`;
-
-  tokenStatus.className =
-    "status success";
-
-  updateRepositoryInfo();
-  updateAuthUI(true);
-
-  if(tokenInput){
-    tokenInput.value = "";
-  }
-}
-
-if(tokenForm){
-
-  tokenForm.addEventListener(
-    "submit",
-    async event => {
-
-      event.preventDefault();
-
-      const token =
-        tokenInput.value.trim();
-
-      if(!token){
-
-        tokenStatus.textContent =
-          "Please enter a GitHub token.";
-
-        tokenStatus.className =
-          "status error";
-
-        return;
-      }
-
-      try{
-
-        await connectGitHub(token);
-
-      }catch(error){
-
-        clearToken();
-
-        tokenStatus.textContent =
-          error.message;
-
-        tokenStatus.className =
-          "status error";
-
-        updateAuthUI(false);
-      }
     }
-  );
+
+  }
+
 }
 
-if(logoutButton){
 
-  logoutButton.addEventListener(
+async function verifyToken(
+  token
+){
+
+  const response =
+    await fetch(
+      "https://api.github.com/user",
+      {
+        headers:{
+          "Accept":
+            "application/vnd.github+json",
+
+          "Authorization":
+            `Bearer ${token}`,
+
+          "X-GitHub-Api-Version":
+            "2022-11-28"
+        }
+      }
+    );
+
+
+  if(!response.ok){
+
+    throw new Error(
+      "Invalid GitHub token."
+    );
+
+  }
+
+
+  return response.json();
+
+}
+
+
+async function verifyRepository(
+  token
+){
+
+  const response =
+    await fetch(
+      `https://api.github.com/repos/${OWNER}/${REPO}`,
+      {
+        headers:{
+          "Accept":
+            "application/vnd.github+json",
+
+          "Authorization":
+            `Bearer ${token}`,
+
+          "X-GitHub-Api-Version":
+            "2022-11-28"
+        }
+      }
+    );
+
+
+  if(!response.ok){
+
+    if(response.status === 404){
+
+      throw new Error(
+        `Token cannot access ${OWNER}/${REPO}.`
+      );
+
+    }
+
+    throw new Error(
+      `Repository check failed: ${response.status}`
+    );
+
+  }
+
+
+  return response.json();
+
+}
+
+
+async function connectGitHub(){
+
+  const token =
+    tokenInput
+      ? tokenInput.value.trim()
+      : "";
+
+
+  if(!token){
+
+    showError(
+      "Enter your GitHub token."
+    );
+
+    return;
+
+  }
+
+
+  if(connectBtn){
+
+    connectBtn.disabled =
+      true;
+
+    connectBtn.textContent =
+      "Connecting...";
+
+  }
+
+
+  try{
+
+    showSuccess(
+      "Checking GitHub token..."
+    );
+
+
+    const user =
+      await verifyToken(token);
+
+
+    showSuccess(
+      `Token valid. Checking ${OWNER}/${REPO}...`
+    );
+
+
+    await verifyRepository(
+      token
+    );
+
+
+    setToken(token);
+
+
+    updateUI(
+      true,
+      user.login
+    );
+
+
+    if(tokenInput){
+      tokenInput.value = "";
+    }
+
+
+    window.dispatchEvent(
+      new Event("github-connected")
+    );
+
+
+  }catch(error){
+
+    clearToken();
+
+    updateUI(false);
+
+    showError(
+      `❌ ${error.message}`
+    );
+
+
+  }finally{
+
+    if(connectBtn){
+
+      connectBtn.disabled =
+        false;
+
+      connectBtn.textContent =
+        "Connect GitHub";
+
+    }
+
+  }
+
+}
+
+
+if(connectBtn){
+
+  connectBtn.addEventListener(
+    "click",
+    connectGitHub
+  );
+
+}
+
+
+if(logoutBtn){
+
+  logoutBtn.addEventListener(
     "click",
     () => {
 
       clearToken();
 
-      tokenStatus.textContent =
-        "GitHub disconnected.";
+      updateUI(false);
 
-      tokenStatus.className =
-        "status";
+      window.dispatchEvent(
+        new Event("github-disconnected")
+      );
 
-      updateRepositoryInfo();
-      updateAuthUI(false);
     }
   );
-}
-
-if(getToken()){
-
-  verifyToken(getToken())
-    .then(async () => {
-
-      try{
-
-        await verifyRepository(
-          getToken()
-        );
-
-        updateAuthUI(true);
-        updateRepositoryInfo();
-
-      }catch{
-
-        clearToken();
-        updateAuthUI(false);
-        updateRepositoryInfo();
-
-      }
-
-    })
-    .catch(() => {
-
-      clearToken();
-      updateAuthUI(false);
-      updateRepositoryInfo();
-
-    });
-
-}else{
-
-  updateAuthUI(false);
-  updateRepositoryInfo();
 
 }
+
+
+async function restoreLogin(){
+
+  const token =
+    getToken();
+
+
+  if(!token){
+
+    updateUI(false);
+
+    return;
+
+  }
+
+
+  try{
+
+    const user =
+      await verifyToken(token);
+
+
+    await verifyRepository(
+      token
+    );
+
+
+    updateUI(
+      true,
+      user.login
+    );
+
+
+    window.dispatchEvent(
+      new Event("github-connected")
+    );
+
+
+  }catch{
+
+    clearToken();
+
+    updateUI(false);
+
+  }
+
+}
+
+
+restoreLogin();
