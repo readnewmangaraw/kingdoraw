@@ -242,7 +242,7 @@ async function uploadGitHubFile(
 async function getPosts(){
 
   const response =
-    await githubApi(
+    await window.githubApi(
       "/contents/data/posts.json?ref=main"
     );
 
@@ -301,7 +301,7 @@ async function savePosts(
 
 
   const response =
-    await githubApi(
+    await window.githubApi(
       "/contents/data/posts.json",
       {
 

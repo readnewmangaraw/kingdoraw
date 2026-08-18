@@ -174,7 +174,7 @@ siteSettingsForm.addEventListener(
 
 
       const existing =
-        await githubApi(
+        await window.githubApi(
           "/contents/site.config.js?ref=main"
         );
 
@@ -182,7 +182,7 @@ siteSettingsForm.addEventListener(
         await existing.json();
 
 
-      await githubApi(
+      await window.githubApi(
         "/contents/site.config.js",
         {
 

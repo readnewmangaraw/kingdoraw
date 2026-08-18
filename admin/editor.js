@@ -137,14 +137,14 @@ editorForm.addEventListener("submit", async event => {
       );
 
     const existing =
-      await githubApi(
+      await window.githubApi(
         "/contents/data/posts.json?ref=main"
       );
 
     const existingData =
       await existing.json();
 
-    await githubApi(
+    await window.githubApi(
       "/contents/data/posts.json",
       {
 

@@ -56,7 +56,7 @@ let editingSlug = null;
 let manualSlug = false;
 
 
-function github(path, options = {}){
+function window.githubApi(path, options = {}){
 
   if(
     typeof window.githubApi !==
@@ -194,7 +194,7 @@ async function loadPosts() {
   try {
 
     const response =
-      await github(
+      await window.githubApi(
         "/contents/data/posts.json?ref=" + BRANCH
       );
 
@@ -748,7 +748,7 @@ async function uploadFile(
   try {
 
     const existing =
-      await github(
+      await window.githubApi(
         `/contents/${encodePath(filePath)}?ref=${BRANCH}`
       );
 
@@ -773,7 +773,7 @@ async function uploadFile(
     body.sha = sha;
   }
 
-  await github(
+  await window.githubApi(
     `/contents/${encodePath(filePath)}`,
     {
       method: "PUT",
@@ -800,7 +800,7 @@ SAVE POSTS JSON
 async function savePosts() {
 
   const response =
-    await github(
+    await window.githubApi(
       `/contents/data/posts.json?ref=${BRANCH}`
     );
 
@@ -821,7 +821,7 @@ async function savePosts() {
     );
 
 
-  await github(
+  await window.githubApi(
     "/contents/data/posts.json",
     {
       method: "PUT",
@@ -866,7 +866,7 @@ async function deleteDirectoryFiles(
   try {
 
     const response =
-      await github(
+      await window.githubApi(
         `/contents/images/${encodePath(slug)}?ref=${BRANCH}`
       );
 
@@ -891,7 +891,7 @@ async function deleteDirectoryFiles(
       continue;
     }
 
-    await github(
+    await window.githubApi(
       `/contents/${encodePath(file.path)}`,
       {
         method: "DELETE",
