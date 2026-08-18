@@ -378,12 +378,104 @@ placeholder="images/slug/001.webp
 images/slug/002.webp"
 ></textarea>
 
-button type="submit" class="green">
+<button type="submit" class="green">
 Update Chapter
 </button>
 
 <div
 id="editorStatus"
+class="status"
+></div>
+
+</form>
+
+</div>
+
+
+<div class="panel">
+
+<h2>Chapter Image Upload</h2>
+
+<form id="uploadForm">
+
+<label for="uploadTitle">
+Title
+</label>
+
+<input
+id="uploadTitle"
+type="text"
+placeholder="Kingdom"
+required
+>
+
+<label for="uploadChapter">
+Chapter
+</label>
+
+<input
+id="uploadChapter"
+type="text"
+placeholder="884"
+required
+>
+
+<label for="uploadLanguage">
+Language
+</label>
+
+<select id="uploadLanguage">
+<option value="Japanese">Japanese</option>
+<option value="English">English</option>
+</select>
+
+<label for="newTitleImage">
+Title Image
+</label>
+
+<input
+id="newTitleImage"
+type="file"
+accept="image/*"
+required
+>
+
+<label for="newChapterImages">
+Chapter Images
+</label>
+
+<input
+id="newChapterImages"
+type="file"
+accept="image/*"
+multiple
+required
+>
+
+<p class="help">
+Select all chapter pages at once.
+The files will be sorted by filename.
+</p>
+
+<label for="uploadKeywords">
+Keywords
+</label>
+
+<textarea
+id="uploadKeywords"
+placeholder="Kingdom Raw, Kingdom Chapter 884, Kingdom 884"
+></textarea>
+
+<button
+type="submit"
+class="green"
+id="uploadButton"
+>
+Publish Chapter
+</button>
+
+<div
+id="uploadStatus"
 class="status"
 ></div>
 
@@ -642,6 +734,7 @@ Cancel
 <script src="admin.js"></script>
 <script src="site-settings.js"></script>
 <script src="editor.js"></script>
+<script src="uploader.js"></script>
 
 </body>
 </html>
