@@ -1,27 +1,465 @@
-const form = document.getElementById("publisherForm");
+const OWNER = "readnewmangaraw";
+const REPO = "kingdoraw";
+const BRANCH = "main";
 
-const titleInput = document.getElementById("title");
-const chapterInput = document.getElementById("chapter");
-const languageInput = document.getElementById("language");
-const slugInput = document.getElementById("slug");
-const keywordsInput = document.getElementById("keywords");
+const tokenInput = document.getElementById("githubToken");
+const connectBtn = document.getElementById("connectBtn");
+const logoutBtn = document.getElementById("logoutBtn");
 
-const coverFile = document.getElementById("coverFile");
-const chapterFiles = document.getElementById("chapterFiles");
+const connectionStatus =
+  document.getElementById("connectionStatus");
 
-const coverPreview = document.getElementById("coverPreview");
-const coverPreviewImage = document.getElementById("coverPreviewImage");
-const chapterList = document.getElementById("chapterList");
+const postsPanel =
+  document.getElementById("postsPanel");
 
-const statusBox = document.getElementById("status");
-const summaryBox = document.getElementById("summary");
+const publisherPanel =
+  document.getElementById("publisherPanel");
 
+const postList =
+  document.getElementById("postList");
+
+const publisherForm =
+  document.getElementById("publisherForm");
+
+const formTitle =
+  document.getElementById("formTitle");
+
+const titleInput =
+  document.getElementById("title");
+
+const chapterInput =
+  document.getElementById("chapter");
+
+const languageInput =
+  document.getElementById("language");
+
+const slugInput =
+  document.getElementById("slug");
+
+const keywordsInput =
+  document.getElementById("keywords");
+
+const coverFile =
+  document.getElementById("coverFile");
+
+const chapterFiles =
+  document.getElementById("chapterFiles");
+
+const fileList =
+  document.getElementById("fileList");
+
+const currentCover =
+  document.getElementById("currentCover");
+
+const publishBtn =
+  document.getElementById("publishBtn");
+
+const publishStatus =
+  document.getElementById("publishStatus");
+
+const cancelBtn =
+  document.getElementById("cancelBtn");
+
+let posts = [];
+let editingSlug = null;
 let manualSlug = false;
 
 
-/* ------------------------------
-   AUTO SLUG
------------------------------- */
+/*
+========================================
+TOKEN
+========================================
+*/
+
+function getToken() {
+  return sessionStorage.getItem("kingdom_github_token") || "";
+}
+
+function setToken(value) {
+  sessionStorage.setItem(
+    "kingdom_github_token",
+    value
+  );
+}
+
+function clearToken() {
+  sessionStorage.removeItem(
+    "kingdom_github_token"
+  );
+}
+
+
+/*
+========================================
+GITHUB API
+========================================
+*/
+
+async function github(path, options = {}) {
+
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("GitHub token is missing.");
+  }
+
+  const response = await fetch(
+    `https://api.github.com/repos/${OWNER}/${REPO}${path}`,
+    {
+      ...options,
+      headers: {
+        "Accept": "application/vnd.github+json",
+        "Authorization": `Bearer ${token}`,
+        "X-GitHub-Api-Version": "2022-11-28",
+        ...(options.headers || {})
+      }
+    }
+  );
+
+  if (!response.ok) {
+
+    let message = response.statusText;
+
+    try {
+      const data = await response.json();
+
+      if (data.message) {
+        message = data.message;
+      }
+
+    } catch {}
+
+    throw new Error(
+      `GitHub API ${response.status}: ${message}`
+    );
+  }
+
+  return response;
+}
+
+
+/*
+========================================
+CONNECT
+========================================
+*/
+
+connectBtn.addEventListener("click", async () => {
+
+  const token =
+    tokenInput.value.trim();
+
+  if (!token) {
+    showConnectionError(
+      "Enter your GitHub token."
+    );
+    return;
+  }
+
+  try {
+
+    sessionStorage.setItem(
+      "kingdom_github_token",
+      token
+    );
+
+    await github("/contents/data/posts.json");
+
+    showConnectionSuccess(
+      "GitHub connected successfully."
+    );
+
+    tokenInput.value = "";
+
+    connectBtn.classList.add("hidden");
+    logoutBtn.classList.remove("hidden");
+
+    postsPanel.classList.remove("hidden");
+    publisherPanel.classList.remove("hidden");
+
+    await loadPosts();
+
+  } catch (error) {
+
+    clearToken();
+
+    showConnectionError(
+      error.message
+    );
+
+  }
+
+});
+
+
+/*
+========================================
+AUTO CONNECT FROM SESSION
+========================================
+*/
+
+window.addEventListener("DOMContentLoaded", async () => {
+
+  if (!getToken()) {
+    return;
+  }
+
+  try {
+
+    await github("/contents/data/posts.json");
+
+    connectBtn.classList.add("hidden");
+    logoutBtn.classList.remove("hidden");
+
+    postsPanel.classList.remove("hidden");
+    publisherPanel.classList.remove("hidden");
+
+    await loadPosts();
+
+    showConnectionSuccess(
+      "GitHub session restored."
+    );
+
+  } catch {
+
+    clearToken();
+
+  }
+
+});
+
+
+/*
+========================================
+LOGOUT
+========================================
+*/
+
+logoutBtn.addEventListener("click", () => {
+
+  clearToken();
+
+  location.reload();
+
+});
+
+
+/*
+========================================
+LOAD POSTS
+========================================
+*/
+
+async function loadPosts() {
+
+  postList.innerHTML =
+    "Loading chapters...";
+
+  try {
+
+    const response =
+      await github(
+        "/contents/data/posts.json?ref=" + BRANCH
+      );
+
+    const data =
+      await response.json();
+
+    const decoded =
+      decodeBase64(data.content);
+
+    posts =
+      JSON.parse(decoded);
+
+    renderPosts();
+
+  } catch (error) {
+
+    postList.innerHTML =
+      `<div class="status error">
+        ${escapeHtml(error.message)}
+      </div>`;
+
+  }
+
+}
+
+
+/*
+========================================
+RENDER POSTS
+========================================
+*/
+
+function renderPosts() {
+
+  if (!posts.length) {
+
+    postList.innerHTML =
+      `<div class="help">
+        No chapters published yet.
+      </div>`;
+
+    return;
+
+  }
+
+  postList.innerHTML =
+    posts.map(post => `
+
+      <div class="post-item">
+
+        <div class="post-info">
+
+          <strong>
+            ${escapeHtml(post.title)}
+          </strong>
+
+          <span>
+            Chapter ${escapeHtml(post.chapter)}
+            · ${escapeHtml(post.language)}
+          </span>
+
+        </div>
+
+        <button
+          class="secondary edit-btn"
+          data-slug="${escapeHtml(post.slug)}"
+        >
+          Edit
+        </button>
+
+      </div>
+
+    `).join("");
+
+  document
+    .querySelectorAll(".edit-btn")
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => editPost(
+          button.dataset.slug
+        )
+      );
+
+    });
+
+}
+
+
+/*
+========================================
+EDIT POST
+========================================
+*/
+
+function editPost(slug) {
+
+  const post =
+    posts.find(
+      item => item.slug === slug
+    );
+
+  if (!post) {
+    return;
+  }
+
+  editingSlug = slug;
+  manualSlug = true;
+
+  formTitle.textContent =
+    "Update Existing Chapter";
+
+  publishBtn.textContent =
+    "Update Chapter";
+
+  titleInput.value =
+    post.title || "";
+
+  chapterInput.value =
+    post.chapter || "";
+
+  languageInput.value =
+    post.language || "English";
+
+  slugInput.value =
+    post.slug || "";
+
+  keywordsInput.value =
+    Array.isArray(post.keywords)
+      ? post.keywords.join(", ")
+      : "";
+
+  coverFile.value = "";
+  chapterFiles.value = "";
+
+  currentCover.textContent =
+    `Current title image: ${post.cover || "none"}`;
+
+  fileList.innerHTML =
+    `Existing chapter images: ${
+      Array.isArray(post.images)
+        ? post.images.length
+        : 0
+    }`;
+
+  publisherPanel.scrollIntoView({
+    behavior: "smooth"
+  });
+
+}
+
+
+/*
+========================================
+NEW CHAPTER
+========================================
+*/
+
+function resetPublisher() {
+
+  editingSlug = null;
+  manualSlug = false;
+
+  formTitle.textContent =
+    "New Chapter";
+
+  publishBtn.textContent =
+    "Publish Chapter";
+
+  publisherForm.reset();
+
+  currentCover.textContent = "";
+
+  fileList.innerHTML = "";
+
+  publishStatus.className =
+    "status";
+
+  publishStatus.textContent = "";
+
+}
+
+
+/*
+========================================
+CANCEL
+========================================
+*/
+
+cancelBtn.addEventListener(
+  "click",
+  resetPublisher
+);
+
+
+/*
+========================================
+AUTO SLUG
+========================================
+*/
 
 function createSlug() {
 
@@ -29,280 +467,682 @@ function createSlug() {
     return;
   }
 
-  const title = titleInput.value.trim();
-  const chapter = chapterInput.value.trim();
+  const title =
+    titleInput.value.trim();
 
-  if (!title && !chapter) {
-    slugInput.value = "";
-    return;
-  }
+  const chapter =
+    chapterInput.value.trim();
 
   slugInput.value =
     `${title}-${chapter}`
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
+
 }
 
+titleInput.addEventListener(
+  "input",
+  createSlug
+);
 
-titleInput.addEventListener("input", createSlug);
-chapterInput.addEventListener("input", createSlug);
+chapterInput.addEventListener(
+  "input",
+  createSlug
+);
 
-slugInput.addEventListener("input", () => {
-  manualSlug = true;
-});
-
-
-/* ------------------------------
-   TITLE IMAGE PREVIEW
------------------------------- */
-
-coverFile.addEventListener("change", () => {
-
-  const file = coverFile.files[0];
-
-  if (!file) {
-    coverPreview.style.display = "none";
-    return;
+slugInput.addEventListener(
+  "input",
+  () => {
+    manualSlug = true;
   }
-
-  const url = URL.createObjectURL(file);
-
-  coverPreviewImage.src = url;
-  coverPreview.style.display = "block";
-});
+);
 
 
-/* ------------------------------
-   CHAPTER IMAGE LIST
------------------------------- */
+/*
+========================================
+FILES
+========================================
+*/
 
-chapterFiles.addEventListener("change", () => {
+chapterFiles.addEventListener(
+  "change",
+  () => {
 
-  chapterList.innerHTML = "";
+    const files =
+      Array.from(chapterFiles.files);
 
-  const files = Array.from(chapterFiles.files);
+    fileList.innerHTML =
+      files.map((file, index) => {
 
-  if (!files.length) {
-    return;
+        const number =
+          String(index + 1)
+            .padStart(3, "0");
+
+        return `
+          ${number}. ${escapeHtml(file.name)}
+        `;
+
+      }).join("<br>");
+
   }
-
-  files.forEach((file, index) => {
-
-    const number =
-      String(index + 1).padStart(3, "0");
-
-    const item = document.createElement("div");
-
-    item.textContent =
-      `${number}. ${file.name}`;
-
-    chapterList.appendChild(item);
-
-  });
-
-});
+);
 
 
-/* ------------------------------
-   FORM SUBMIT
------------------------------- */
+/*
+========================================
+PUBLISH / UPDATE
+========================================
+*/
 
-form.addEventListener("submit", (event) => {
+publisherForm.addEventListener(
+  "submit",
+  async event => {
 
-  event.preventDefault();
+    event.preventDefault();
 
-  const title = titleInput.value.trim();
-  const chapter = chapterInput.value.trim();
-  const language = languageInput.value;
-  const slug = slugInput.value.trim();
+    try {
 
-  const keywords =
-    keywordsInput.value
-      .split(",")
-      .map(item => item.trim())
-      .filter(Boolean);
+      publishBtn.disabled = true;
 
-  const cover = coverFile.files[0];
-  const images = Array.from(chapterFiles.files);
+      showPublishStatus(
+        editingSlug
+          ? "Updating chapter..."
+          : "Publishing chapter...",
+        "warning"
+      );
 
 
-  /* VALIDATION */
+      const title =
+        titleInput.value.trim();
 
-  if (!title) {
-    showError("Please enter the manga title.");
-    return;
+      const chapter =
+        chapterInput.value.trim();
+
+      const language =
+        languageInput.value;
+
+      const slug =
+        slugInput.value.trim();
+
+      const keywords =
+        keywordsInput.value
+          .split(",")
+          .map(x => x.trim())
+          .filter(Boolean);
+
+      if (!title) {
+        throw new Error(
+          "Manga title is required."
+        );
+      }
+
+      if (!chapter) {
+        throw new Error(
+          "Chapter number is required."
+        );
+      }
+
+      if (!slug) {
+        throw new Error(
+          "Slug is required."
+        );
+      }
+
+
+      const newCover =
+        coverFile.files[0] || null;
+
+      const newImages =
+        Array.from(
+          chapterFiles.files
+        );
+
+
+      if (!editingSlug && !newCover) {
+        throw new Error(
+          "Title image is required."
+        );
+      }
+
+      if (!editingSlug && !newImages.length) {
+        throw new Error(
+          "Chapter images are required."
+        );
+      }
+
+
+      /*
+        Find old post
+      */
+
+      const oldPost =
+        editingSlug
+          ? posts.find(
+              p => p.slug === editingSlug
+            )
+          : null;
+
+
+      /*
+        Upload title image
+      */
+
+      let coverPath =
+        oldPost?.cover ||
+        `images/${slug}/title.jpg`;
+
+      if (newCover) {
+
+        coverPath =
+          `images/${slug}/title.jpg`;
+
+        await uploadFile(
+          coverPath,
+          await fileToBase64(newCover),
+          `Update title image: ${title} Chapter ${chapter}`
+        );
+
+      }
+
+
+      /*
+        Upload chapter images
+      */
+
+      let imagePaths =
+        oldPost?.images
+          ? [...oldPost.images]
+          : [];
+
+
+      if (newImages.length) {
+
+        imagePaths = [];
+
+        for (
+          let i = 0;
+          i < newImages.length;
+          i++
+        ) {
+
+          const number =
+            String(i + 1)
+              .padStart(3, "0");
+
+          const filePath =
+            `images/${slug}/${number}.webp`;
+
+          await uploadFile(
+            filePath,
+            await fileToBase64(
+              newImages[i]
+            ),
+            `Update chapter image ${number}`
+          );
+
+          imagePaths.push(filePath);
+
+        }
+
+      }
+
+
+      /*
+        If slug changed during update,
+        remove old directory.
+      */
+
+      if (
+        oldPost &&
+        oldPost.slug !== slug
+      ) {
+
+        await deleteDirectoryFiles(
+          oldPost.slug
+        );
+
+      }
+
+
+      /*
+        Create new post
+      */
+
+      const post = {
+
+        title,
+
+        chapter,
+
+        language,
+
+        slug,
+
+        cover: coverPath,
+
+        images: imagePaths,
+
+        keywords,
+
+        updatedAt:
+          new Date().toISOString()
+
+      };
+
+
+      /*
+        Update posts array
+      */
+
+      const index =
+        posts.findIndex(
+          p =>
+            p.slug ===
+            (editingSlug || slug)
+        );
+
+
+      if (index >= 0) {
+
+        posts[index] = post;
+
+      } else {
+
+        posts.unshift(post);
+
+      }
+
+
+      /*
+        Save posts.json
+      */
+
+      await savePosts();
+
+
+      /*
+        Finish
+      */
+
+      showPublishStatus(
+        editingSlug
+          ? "Chapter updated successfully."
+          : "Chapter published successfully.",
+        "success"
+      );
+
+      await loadPosts();
+
+      resetPublisher();
+
+    } catch (error) {
+
+      console.error(error);
+
+      showPublishStatus(
+        error.message,
+        "error"
+      );
+
+    } finally {
+
+      publishBtn.disabled = false;
+
+    }
+
   }
-
-  if (!chapter) {
-    showError("Please enter the chapter number.");
-    return;
-  }
-
-  if (!slug) {
-    showError("Please enter the slug.");
-    return;
-  }
-
-  if (!cover) {
-    showError("Please select the Title Image.");
-    return;
-  }
-
-  if (!images.length) {
-    showError("Please select the Chapter Images.");
-    return;
-  }
+);
 
 
-  /* CREATE POST DATA */
+/*
+========================================
+UPLOAD FILE
+========================================
+*/
 
-  const post = {
+async function uploadFile(
+  filePath,
+  base64,
+  message
+) {
 
-    title: title,
+  let sha = null;
 
-    chapter: chapter,
+  try {
 
-    language: language,
+    const existing =
+      await github(
+        `/contents/${encodePath(filePath)}?ref=${BRANCH}`
+      );
 
-    slug: slug,
+    const data =
+      await existing.json();
 
-    cover: `images/${slug}/title.jpg`,
+    sha = data.sha;
 
-    images: images.map((file, index) => {
+  } catch {}
 
-      const number =
-        String(index + 1).padStart(3, "0");
+  const body = {
 
-      return `images/${slug}/${number}.webp`;
+    message,
 
-    }),
+    content: base64,
 
-    keywords: keywords,
-
-    updatedAt: new Date().toISOString()
+    branch: BRANCH
 
   };
 
+  if (sha) {
+    body.sha = sha;
+  }
 
-  console.log("Prepared post:", post);
+  await github(
+    `/contents/${encodePath(filePath)}`,
+    {
+      method: "PUT",
 
+      body:
+        JSON.stringify(body),
 
-  /* SUMMARY */
-
-  summaryBox.innerHTML = `
-
-    <h3>Chapter Ready</h3>
-
-    <div class="summary-row">
-      <strong>Title:</strong>
-      ${escapeHtml(title)}
-    </div>
-
-    <div class="summary-row">
-      <strong>Chapter:</strong>
-      ${escapeHtml(chapter)}
-    </div>
-
-    <div class="summary-row">
-      <strong>Language:</strong>
-      ${escapeHtml(language)}
-    </div>
-
-    <div class="summary-row">
-      <strong>Slug:</strong>
-      ${escapeHtml(slug)}
-    </div>
-
-    <div class="summary-row">
-      <strong>Title Image:</strong>
-      ${escapeHtml(cover.name)}
-      → title.jpg
-    </div>
-
-    <div class="summary-row">
-      <strong>Chapter Images:</strong>
-      ${images.length}
-    </div>
-
-    <div class="summary-row">
-      <strong>Keywords:</strong>
-      ${keywords.length}
-    </div>
-
-  `;
-
-  summaryBox.style.display = "block";
-
-  showSuccess(
-    "Chapter data prepared successfully."
+      headers: {
+        "Content-Type":
+          "application/json"
+      }
+    }
   );
 
-});
+}
 
 
-/* ------------------------------
-   CLEAR
------------------------------- */
+/*
+========================================
+SAVE POSTS JSON
+========================================
+*/
 
-document.getElementById("clearBtn")
-  .addEventListener("click", () => {
+async function savePosts() {
 
-    form.reset();
+  const response =
+    await github(
+      `/contents/data/posts.json?ref=${BRANCH}`
+    );
 
-    manualSlug = false;
+  const data =
+    await response.json();
 
-    coverPreview.style.display = "none";
+  const content =
+    btoa(
+      unescape(
+        encodeURIComponent(
+          JSON.stringify(
+            posts,
+            null,
+            2
+          ) + "\n"
+        )
+      )
+    );
 
-    chapterList.innerHTML = "";
 
-    summaryBox.style.display = "none";
+  await github(
+    "/contents/data/posts.json",
+    {
+      method: "PUT",
 
-    statusBox.style.display = "none";
+      headers: {
+        "Content-Type":
+          "application/json"
+      },
 
-  });
+      body:
+        JSON.stringify({
+
+          message:
+            "Update manga posts",
+
+          content,
+
+          sha: data.sha,
+
+          branch: BRANCH
+
+        })
+
+    }
+  );
+
+}
 
 
-/* ------------------------------
-   STATUS
------------------------------- */
+/*
+========================================
+DELETE OLD DIRECTORY FILES
+========================================
+*/
 
-function showSuccess(message) {
+async function deleteDirectoryFiles(
+  slug
+) {
 
-  statusBox.textContent = message;
+  let files = [];
 
-  statusBox.className =
+  try {
+
+    const response =
+      await github(
+        `/contents/images/${encodePath(slug)}?ref=${BRANCH}`
+      );
+
+    files =
+      await response.json();
+
+  } catch {
+
+    return;
+
+  }
+
+
+  if (!Array.isArray(files)) {
+    return;
+  }
+
+
+  for (const file of files) {
+
+    if (file.type !== "file") {
+      continue;
+    }
+
+    await github(
+      `/contents/${encodePath(file.path)}`,
+      {
+        method: "DELETE",
+
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify({
+
+            message:
+              "Remove old manga image",
+
+            sha:
+              file.sha,
+
+            branch:
+              BRANCH
+
+          })
+
+      }
+    );
+
+  }
+
+}
+
+
+/*
+========================================
+FILE TO BASE64
+========================================
+*/
+
+function fileToBase64(file) {
+
+  return new Promise(
+    (resolve, reject) => {
+
+      const reader =
+        new FileReader();
+
+      reader.onload = () => {
+
+        const result =
+          reader.result;
+
+        const base64 =
+          result
+            .split(",")[1];
+
+        resolve(base64);
+
+      };
+
+      reader.onerror =
+        reject;
+
+      reader.readAsDataURL(file);
+
+    }
+  );
+
+}
+
+
+/*
+========================================
+BASE64 DECODE
+========================================
+*/
+
+function decodeBase64(value) {
+
+  const binary =
+    atob(
+      value.replace(/\n/g, "")
+    );
+
+  const bytes =
+    Uint8Array.from(
+      binary,
+      char => char.charCodeAt(0)
+    );
+
+  return new TextDecoder()
+    .decode(bytes);
+
+}
+
+
+/*
+========================================
+PATH ENCODE
+========================================
+*/
+
+function encodePath(value) {
+
+  return value
+    .split("/")
+    .map(encodeURIComponent)
+    .join("/");
+
+}
+
+
+/*
+========================================
+STATUS
+========================================
+*/
+
+function showConnectionSuccess(
+  message
+) {
+
+  connectionStatus.textContent =
+    message;
+
+  connectionStatus.className =
     "status success";
 
 }
 
+function showConnectionError(
+  message
+) {
 
-function showError(message) {
+  connectionStatus.textContent =
+    message;
 
-  statusBox.textContent = message;
-
-  statusBox.className =
+  connectionStatus.className =
     "status error";
 
 }
 
+function showPublishStatus(
+  message,
+  type
+) {
 
-/* ------------------------------
-   ESCAPE HTML
------------------------------- */
+  publishStatus.textContent =
+    message;
+
+  publishStatus.className =
+    `status ${type}`;
+
+}
+
+
+/*
+========================================
+ESCAPE
+========================================
+*/
 
 function escapeHtml(value) {
 
   return String(value)
 
-    .replaceAll("&", "&amp;")
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
 
-    .replaceAll("<", "&lt;")
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
 
-    .replaceAll(">", "&gt;")
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
 
-    .replaceAll('"', "&quot;")
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
 
-    .replaceAll("'", "&#039;");
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
 
 }

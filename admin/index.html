@@ -1,381 +1,475 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kingdom Admin</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kingdom Admin</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<style>
+*{box-sizing:border-box}
 
-    :root {
-      --bg: #05080d;
-      --panel: #0b1118;
-      --panel2: #101820;
-      --border: #1c2b38;
-      --text: #edf7ff;
-      --muted: #8fa5b5;
-      --red: #ff304f;
-      --blue: #38bdf8;
-      --green: #39e58c;
-    }
+:root{
+  --bg:#05080d;
+  --panel:#0b1118;
+  --panel2:#101820;
+  --border:#1c2b38;
+  --text:#edf7ff;
+  --muted:#8fa5b5;
+  --red:#ff304f;
+  --blue:#38bdf8;
+  --green:#39e58c;
+}
 
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: Arial, sans-serif;
-    }
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at 10% 0%,rgba(255,48,79,.08),transparent 30%),
+    radial-gradient(circle at 90% 0%,rgba(56,189,248,.08),transparent 30%),
+    var(--bg);
+  color:var(--text);
+  font-family:Arial,sans-serif;
+}
 
-    .container {
-      width: min(1000px, calc(100% - 30px));
-      margin: auto;
-      padding: 35px 0 70px;
-    }
+.container{
+  width:min(1050px,calc(100% - 30px));
+  margin:auto;
+  padding:30px 0 70px;
+}
 
-    h1 {
-      margin: 0;
-      color: var(--red);
-      font-size: 34px;
-    }
+h1{
+  margin:0;
+  color:var(--red);
+}
 
-    .subtitle {
-      color: var(--muted);
-      margin: 8px 0 30px;
-    }
+.sub{
+  color:var(--muted);
+  margin:8px 0 25px;
+}
 
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 25px;
-    }
+.panel{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:15px;
+  padding:22px;
+  margin-bottom:20px;
+}
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
+.panel h2{
+  margin-top:0;
+  color:var(--blue);
+  font-size:20px;
+}
 
-    .full {
-      grid-column: 1 / -1;
-    }
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
 
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 700;
-    }
+.full{
+  grid-column:1/-1;
+}
 
-    input,
-    select,
-    textarea {
-      width: 100%;
-      padding: 13px;
-      background: var(--panel2);
-      border: 1px solid var(--border);
-      color: white;
-      border-radius: 9px;
-      outline: none;
-    }
+label{
+  display:block;
+  margin-bottom:7px;
+  font-weight:700;
+}
 
-    input:focus,
-    select:focus,
-    textarea:focus {
-      border-color: var(--blue);
-    }
+input,select,textarea{
+  width:100%;
+  padding:12px;
+  background:var(--panel2);
+  border:1px solid var(--border);
+  color:white;
+  border-radius:8px;
+  outline:none;
+}
 
-    textarea {
-      min-height: 110px;
-      resize: vertical;
-    }
+input:focus,select:focus,textarea:focus{
+  border-color:var(--blue);
+}
 
-    .upload-box {
-      padding: 20px;
-      background: var(--panel2);
-      border: 1px dashed var(--blue);
-      border-radius: 10px;
-    }
+textarea{
+  min-height:100px;
+  resize:vertical;
+}
 
-    .upload-info {
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 8px;
-    }
+button{
+  padding:12px 20px;
+  border:0;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:800;
+}
 
-    .cover-preview {
-      margin-top: 15px;
-      display: none;
-    }
+.primary{
+  background:var(--red);
+  color:white;
+}
 
-    .cover-preview img {
-      width: 180px;
-      max-height: 240px;
-      object-fit: cover;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-    }
+.secondary{
+  background:var(--panel2);
+  border:1px solid var(--border);
+  color:white;
+}
 
-    .chapter-list {
-      margin-top: 15px;
-      color: var(--green);
-      font-size: 14px;
-      line-height: 1.7;
-    }
+.green{
+  background:var(--green);
+  color:#031009;
+}
 
-    .actions {
-      margin-top: 25px;
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
+button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
 
-    button {
-      padding: 13px 22px;
-      border: 0;
-      border-radius: 9px;
-      cursor: pointer;
-      font-weight: 800;
-    }
+.status{
+  display:none;
+  padding:13px;
+  border-radius:8px;
+  margin-top:15px;
+}
 
-    .prepare {
-      background: var(--red);
-      color: white;
-    }
+.success{
+  display:block;
+  color:var(--green);
+  background:rgba(57,229,140,.08);
+  border:1px solid rgba(57,229,140,.2);
+}
 
-    .clear {
-      background: var(--panel2);
-      border: 1px solid var(--border);
-      color: var(--muted);
-    }
+.error{
+  display:block;
+  color:var(--red);
+  background:rgba(255,48,79,.08);
+  border:1px solid rgba(255,48,79,.2);
+}
 
-    .status {
-      margin-top: 20px;
-      padding: 14px;
-      border-radius: 9px;
-      display: none;
-    }
+.warning{
+  display:block;
+  color:#ffd166;
+  background:rgba(255,209,102,.07);
+  border:1px solid rgba(255,209,102,.2);
+}
 
-    .success {
-      display: block;
-      color: var(--green);
-      background: rgba(57, 229, 140, .08);
-      border: 1px solid rgba(57, 229, 140, .2);
-    }
+.help{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:7px;
+  line-height:1.5;
+}
 
-    .error {
-      display: block;
-      color: var(--red);
-      background: rgba(255, 48, 79, .08);
-      border: 1px solid rgba(255, 48, 79, .2);
-    }
+.post-list{
+  display:grid;
+  gap:10px;
+}
 
-    .summary {
-      margin-top: 25px;
-      padding: 20px;
-      background: var(--panel2);
-      border-radius: 10px;
-      display: none;
-    }
+.post-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  padding:13px;
+  background:var(--panel2);
+  border:1px solid var(--border);
+  border-radius:9px;
+}
 
-    .summary h3 {
-      margin-top: 0;
-      color: var(--blue);
-    }
+.post-info strong{
+  display:block;
+}
 
-    .summary-row {
-      padding: 7px 0;
-      border-bottom: 1px solid var(--border);
-    }
+.post-info span{
+  color:var(--muted);
+  font-size:13px;
+}
 
-    @media (max-width: 700px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
+.file-list{
+  margin-top:12px;
+  color:var(--green);
+  font-size:13px;
+  line-height:1.7;
+  max-height:180px;
+  overflow:auto;
+}
 
-      .full {
-        grid-column: auto;
-      }
+.actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:20px;
+}
 
-      .panel {
-        padding: 18px;
-      }
-    }
-  </style>
+.hidden{
+  display:none!important;
+}
+
+@media(max-width:700px){
+  .grid{
+    grid-template-columns:1fr;
+  }
+
+  .full{
+    grid-column:auto;
+  }
+
+  .panel{
+    padding:17px;
+  }
+
+  .post-item{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+}
+</style>
 </head>
 
 <body>
 
 <div class="container">
 
-  <h1>Kingdom Admin</h1>
-  <div class="subtitle">
-    Create and publish manga chapters
-  </div>
+<h1>Kingdom Admin</h1>
+<div class="sub">GitHub Manga Publisher</div>
 
-  <div class="panel">
 
-    <form id="publisherForm">
+<!-- GITHUB CONNECTION -->
 
-      <div class="grid">
+<div class="panel">
 
-        <!-- TITLE -->
-        <div>
-          <label for="title">Manga Title</label>
-          <input
-            id="title"
-            type="text"
-            placeholder="One Piece"
-            required
-          >
-        </div>
+<h2>GitHub Connection</h2>
 
-        <!-- CHAPTER -->
-        <div>
-          <label for="chapter">Chapter Number</label>
-          <input
-            id="chapter"
-            type="text"
-            placeholder="1191"
-            required
-          >
-        </div>
+<div class="grid">
 
-        <!-- LANGUAGE -->
-        <div>
-          <label for="language">Language</label>
+<div>
+<label for="githubToken">GitHub Token</label>
 
-          <select id="language">
-            <option value="English">English</option>
-            <option value="Japanese">日本語</option>
-          </select>
-        </div>
+<input
+id="githubToken"
+type="password"
+placeholder="github_pat_..."
+autocomplete="off"
+>
 
-        <!-- SLUG -->
-        <div>
-          <label for="slug">Slug</label>
+<div class="help">
+Token is kept only in this browser session.
+Do not save it in the repository.
+</div>
+</div>
 
-          <input
-            id="slug"
-            type="text"
-            placeholder="one-piece-1191"
-            required
-          >
-        </div>
+<div>
+<label>Repository</label>
 
-        <!-- KEYWORDS -->
-        <div class="full">
+<input
+value="readnewmangaraw/kingdoraw"
+readonly
+>
 
-          <label for="keywords">
-            Keywords
-          </label>
-
-          <textarea
-            id="keywords"
-            placeholder="One Piece 1191, One Piece Chapter 1191, One Piece Raw, One Piece Manga"
-          ></textarea>
-
-        </div>
-
-        <!-- TITLE IMAGE -->
-        <div class="full">
-
-          <label>
-            Title Image
-          </label>
-
-          <div class="upload-box">
-
-            <input
-              id="coverFile"
-              type="file"
-              accept="image/*"
-            >
-
-            <div class="upload-info">
-              This image will be saved as:
-              <strong>title.jpg</strong>
-            </div>
-
-            <div
-              id="coverPreview"
-              class="cover-preview"
-            >
-              <img id="coverPreviewImage" alt="Title image preview">
-            </div>
-
-          </div>
-
-        </div>
-
-        <!-- CHAPTER IMAGES -->
-        <div class="full">
-
-          <label>
-            Chapter Images
-          </label>
-
-          <div class="upload-box">
-
-            <input
-              id="chapterFiles"
-              type="file"
-              accept="image/*"
-              multiple
-            >
-
-            <div class="upload-info">
-              Images will automatically be numbered:
-              001.webp, 002.webp, 003.webp...
-            </div>
-
-            <div
-              id="chapterList"
-              class="chapter-list"
-            ></div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      <div class="actions">
-
-        <button
-          type="submit"
-          class="prepare"
-        >
-          Prepare Chapter
-        </button>
-
-        <button
-          type="button"
-          class="clear"
-          id="clearBtn"
-        >
-          Clear
-        </button>
-
-      </div>
-
-    </form>
-
-    <div
-      id="status"
-      class="status"
-    ></div>
-
-    <div
-      id="summary"
-      class="summary"
-    ></div>
-
-  </div>
+<div class="help">
+Repository is fixed to the Kingdom repository.
+</div>
+</div>
 
 </div>
+
+<div class="actions">
+
+<button
+id="connectBtn"
+class="primary"
+>
+Connect GitHub
+</button>
+
+<button
+id="logoutBtn"
+class="secondary hidden"
+>
+Clear Token
+</button>
+
+</div>
+
+<div id="connectionStatus" class="status"></div>
+
+</div>
+
+
+<!-- EXISTING POSTS -->
+
+<div
+id="postsPanel"
+class="panel hidden"
+>
+
+<h2>Existing Chapters</h2>
+
+<div
+id="postList"
+class="post-list"
+>
+Loading...
+</div>
+
+</div>
+
+
+<!-- PUBLISHER -->
+
+<div
+id="publisherPanel"
+class="panel hidden"
+>
+
+<h2 id="formTitle">New Chapter</h2>
+
+<form id="publisherForm">
+
+<div class="grid">
+
+<div>
+<label for="title">Manga Title</label>
+
+<input
+id="title"
+required
+placeholder="One Piece"
+>
+</div>
+
+
+<div>
+<label for="chapter">Chapter Number</label>
+
+<input
+id="chapter"
+required
+placeholder="1191"
+>
+</div>
+
+
+<div>
+<label for="language">Language</label>
+
+<select id="language">
+
+<option value="English">
+English
+</option>
+
+<option value="Japanese">
+日本語
+</option>
+
+</select>
+</div>
+
+
+<div>
+<label for="slug">Slug</label>
+
+<input
+id="slug"
+required
+placeholder="one-piece-1191"
+>
+
+<div class="help">
+Example: one-piece-1191
+</div>
+</div>
+
+
+<div class="full">
+
+<label for="keywords">
+Keywords
+</label>
+
+<textarea
+id="keywords"
+placeholder="One Piece 1191, One Piece Chapter 1191, One Piece Raw"
+></textarea>
+
+</div>
+
+
+<div class="full">
+
+<label>
+Title Image
+</label>
+
+<input
+id="coverFile"
+type="file"
+accept="image/*"
+>
+
+<div
+id="currentCover"
+class="help"
+></div>
+
+</div>
+
+
+<div class="full">
+
+<label>
+Chapter Images
+</label>
+
+<input
+id="chapterFiles"
+type="file"
+accept="image/*"
+multiple
+>
+
+<div class="help">
+Select images in the correct reading order.
+</div>
+
+<div
+id="fileList"
+class="file-list"
+></div>
+
+</div>
+
+</div>
+
+
+<div class="actions">
+
+<button
+type="submit"
+class="primary"
+id="publishBtn"
+>
+Publish Chapter
+</button>
+
+<button
+type="button"
+class="secondary"
+id="cancelBtn"
+>
+Cancel
+</button>
+
+</div>
+
+</form>
+
+<div id="publishStatus" class="status"></div>
+
+</div>
+
+</div>
+
 
 <script src="admin.js"></script>
 
