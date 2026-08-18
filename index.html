@@ -3,12 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Kingdom Raw Manga - Read the latest manga chapters online.">
-  <title>Kingdom Raw Manga</title>
+  <meta id="siteDescription" name="description" content="">
+  <title id="siteTitle">Kingdom</title>
   <link rel="stylesheet" href="style.css">
   <script src="site.config.js"></script>
 </head>
 <body>
+<script>
+(function () {
+  const c = window.KINGDOM_CONFIG || {};
+
+  document.title =
+    c.siteNameJa ||
+    c.siteName ||
+    "Manga";
+
+  const meta =
+    document.getElementById("siteDescription");
+
+  if (meta) {
+    meta.setAttribute(
+      "content",
+      c.descriptionJa ||
+      ""
+    );
+  }
+
+  document.querySelectorAll(
+    "[data-site-name]"
+  ).forEach(el => {
+    el.textContent =
+      c.siteNameJa ||
+      c.siteName ||
+      "Manga";
+  });
+
+})();
+</script>
 
 <header class="site-header">
   <div class="container header-inner">
