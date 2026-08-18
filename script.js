@@ -180,7 +180,7 @@ function renderChapters(){
 
         <a
           class="chapter-card"
-          href="${encodeURIComponent(post.slug)}"
+          href="/kingdoraw/${encodeURIComponent(post.slug)}"
         >
 
           <div class="card-image">

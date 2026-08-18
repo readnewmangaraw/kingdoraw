@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta name="google-site-verification" content="BZ52T1gZ348pRANE2zL4GQ4CzBD4zIG7TqbrdKdMX8c" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>キングダム</title>
+
+<meta
+  id="metaDescription"
+  name="description"
+  content=""
+>
+
+<meta
+  name="robots"
+  content="index,follow"
+>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="site.config.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+
+  <div class="header-inner">
+
+    <a
+      href="./"
+      class="logo"
+      data-site-name
+    >
+      キングダム
+    </a>
+
+    <nav>
+
+      <a href="./">
+        ホーム
+      </a>
+
+      <a href="./" onclick="document.getElementById('latest').scrollIntoView({behavior:'smooth'}); return false;">
+        最新話
+      </a>
+
+    </nav>
+
+  </div>
+
+</header>
+
+
+<main id="app">
+
+  <section
+    id="homeView"
+    class="home-view"
+  >
+
+    <div class="hero">
+
+      <p class="hero-label">
+        MANGA RAW
+      </p>
+
+      <h1 data-site-name>
+        キングダム
+      </h1>
+
+      <p id="heroDescription">
+        最新話を読むことができます。
+      </p>
+
+    </div>
+
+
+    <section
+      id="latest"
+      class="chapters-section"
+    >
+
+      <div class="section-heading">
+
+        <div>
+          <span>
+            最新話
+          </span>
+
+          <h2>
+            最新チャプター
+          </h2>
+        </div>
+
+        <div class="chapter-count">
+          <span id="chapterCount">0</span>
+          話
+        </div>
+
+      </div>
+
+
+      <div
+        id="chapterGrid"
+        class="chapter-grid"
+      >
+
+        <div class="loading">
+          読み込み中...
+        </div>
+
+      </div>
+
+    </section>
+
+  </section>
+
+
+  <section
+    id="readerView"
+    class="reader-view hidden"
+  >
+
+    <div class="reader-top">
+
+      <button
+        id="backButton"
+        class="back-button"
+      >
+        ← 一覧に戻る
+      </button>
+
+    </div>
+
+
+    <article class="reader">
+
+      <div class="reader-heading">
+
+        <p
+          id="readerLanguage"
+          class="reader-language"
+        ></p>
+
+        <h1 id="readerTitle"></h1>
+
+        <p
+          id="readerChapter"
+          class="reader-chapter"
+        ></p>
+
+      </div>
+
+
+      <div
+        id="readerCover"
+        class="reader-cover"
+      ></div>
+
+
+      <div
+        id="readerImages"
+        class="reader-images"
+      ></div>
+
+
+      <div
+        id="readerKeywords"
+        class="reader-keywords"
+      ></div>
+
+
+      <div class="reader-bottom">
+
+        <button
+          id="previousButton"
+          class="reader-nav"
+        >
+          ← 前の話
+        </button>
+
+        <button
+          id="nextButton"
+          class="reader-nav"
+        >
+          次の話 →
+        </button>
+
+      </div>
+
+    </article>
+
+  </section>
+
+</main>
+
+
+<footer>
+
+  <div data-site-name>
+    キングダム
+  </div>
+
+  <p>
+    最新話をお楽しみください。
+  </p>
+
+</footer>
+
+
+<script>
+(function(){
+
+  var path =
+    window.location.pathname;
+
+  var base =
+    "/kingdoraw/";
+
+  if(
+    path.startsWith(base) &&
+    path !== base &&
+    !window.location.hash
+  ){
+
+    history.replaceState(
+      {},
+      "",
+      base + path.slice(base.length)
+    );
+
+  }
+
+})();
+</script>
+<script src="script.js"></script>
+
+</body>
+</html>
