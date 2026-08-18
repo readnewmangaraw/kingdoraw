@@ -433,6 +433,20 @@ function renderReader(post){
 
 
   /*
+    300x250 AD
+  */
+
+  readerCover.insertAdjacentHTML(
+    "afterend",
+    `
+      <div class="ad-slot ad-300">
+        <div data-ad="300x250"></div>
+      </div>
+    `
+  );
+
+
+  /*
     CHAPTER IMAGES
   */
 
