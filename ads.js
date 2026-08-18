@@ -23,16 +23,13 @@
 
   function loadAd(slot){
 
-    if(!slot){
-      return;
-    }
-
-    if(slot.dataset.loaded === "1"){
+    if(!slot || slot.dataset.loaded === "1"){
       return;
     }
 
     const type =
       slot.dataset.ad;
+
 
     if(type === "effective"){
 
@@ -44,9 +41,19 @@
 
       script.async = true;
 
-      slot.appendChild(script);
+      script.onload =
+        function(){
+          slot.dataset.loaded = "1";
+          loadNextAd();
+        };
 
-      slot.dataset.loaded = "1";
+      script.onerror =
+        function(){
+          slot.dataset.loaded = "0";
+          loadNextAd();
+        };
+
+      slot.appendChild(script);
 
       return;
     }
@@ -56,14 +63,10 @@
       adConfig[type];
 
     if(!config){
+      loadNextAd();
       return;
     }
 
-
-    /*
-      Each ad slot gets its own isolated
-      iframe container.
-    */
 
     const container =
       document.createElement("div");
@@ -85,12 +88,6 @@
 
     slot.appendChild(container);
 
-
-    /*
-      Provider expects atOptions globally.
-      Set it immediately before loading
-      the corresponding provider script.
-    */
 
     window.atOptions = {
       key: config.key,
@@ -118,6 +115,8 @@
         slot.dataset.loaded =
           "1";
 
+        loadNextAd();
+
       };
 
 
@@ -127,6 +126,8 @@
         slot.dataset.loaded =
           "0";
 
+        loadNextAd();
+
       };
 
 
@@ -135,11 +136,36 @@
   }
 
 
+  let adQueue = [];
+  let adIndex = 0;
+
+
+  function loadNextAd(){
+
+    if(adIndex >= adQueue.length){
+      return;
+    }
+
+    const slot =
+      adQueue[adIndex++];
+
+    loadAd(slot);
+
+  }
+
+
   function loadAds(){
 
-    document
-      .querySelectorAll("[data-ad]")
-      .forEach(loadAd);
+    adQueue =
+      [...document.querySelectorAll("[data-ad]")]
+      .filter(
+        slot =>
+          slot.dataset.loaded !== "1"
+      );
+
+    adIndex = 0;
+
+    loadNextAd();
 
   }
 
