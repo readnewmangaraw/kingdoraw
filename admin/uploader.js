@@ -359,8 +359,17 @@ async function savePosts(
 
   if(!response.ok){
 
+    let details = "";
+
+    try{
+      details = await response.text();
+    }catch{}
+
     throw new Error(
-      "Unable to update posts.json"
+      "Unable to update posts.json (" +
+      response.status +
+      "): " +
+      details
     );
 
   }
