@@ -300,8 +300,30 @@ function handleRoute(){
 
   cleanOldHash();
 
-  const slug =
+  let slug =
     getSlugFromPath();
+
+  if(!slug){
+
+    const saved =
+      sessionStorage.getItem(
+        "kingdom_route"
+      );
+
+    if(saved){
+
+      slug =
+        decodeURIComponent(
+          saved.split("?")[0]
+        );
+
+      sessionStorage.removeItem(
+        "kingdom_route"
+      );
+
+    }
+
+  }
 
   if(!slug){
 
