@@ -295,6 +295,79 @@ Clear Token
 </div>
 
 
+
+
+<!-- SITE SETTINGS -->
+
+<div class="panel">
+
+<h2>Website Settings</h2>
+
+<form id="siteSettingsForm">
+
+<div class="grid">
+
+<div>
+<label for="siteName">
+Website Name
+</label>
+
+<input
+id="siteName"
+type="text"
+placeholder="Kingdom"
+required
+>
+</div>
+
+<div>
+<label for="siteNameJa">
+Japanese Website Name
+</label>
+
+<input
+id="siteNameJa"
+type="text"
+placeholder="キングダム"
+required
+>
+</div>
+
+<div class="full">
+
+<label for="descriptionJa">
+Japanese SEO Description
+</label>
+
+<textarea
+id="descriptionJa"
+placeholder="キングダム最新話を読むことができます。"
+></textarea>
+
+</div>
+
+</div>
+
+<div class="actions">
+
+<button
+type="submit"
+class="green"
+>
+Save Website Settings
+</button>
+
+</div>
+
+<div
+id="siteSettingsStatus"
+class="status"
+></div>
+
+</form>
+
+</div>
+
 <!-- EXISTING POSTS -->
 
 <div
@@ -473,6 +546,7 @@ Cancel
 
 <script src="../site.config.js"></script>
 <script src="admin.js"></script>
+<script src="site-settings.js"></script>
 
 </body>
 </html>
