@@ -56,7 +56,7 @@ let editingSlug = null;
 let manualSlug = false;
 
 
-function window.githubApi(path, options = {}){
+function github(path, options = {}){
 
   if(
     typeof window.githubApi !==
