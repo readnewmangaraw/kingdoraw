@@ -297,6 +297,100 @@ Clear Token
 
 
 
+
+<div class="panel">
+
+<h2>Edit Existing Chapter</h2>
+
+<form id="editorForm">
+
+<label for="postSelect">
+Chapter
+</label>
+
+<select id="postSelect">
+<option value="">
+Select a chapter to edit
+</option>
+</select>
+
+<label for="editTitle">
+Title
+</label>
+
+<input
+id="editTitle"
+type="text"
+required
+>
+
+<label for="editChapter">
+Chapter
+</label>
+
+<input
+id="editChapter"
+type="text"
+required
+>
+
+<label for="editLanguage">
+Language
+</label>
+
+<select id="editLanguage">
+<option value="Japanese">
+Japanese
+</option>
+
+<option value="English">
+English
+</option>
+</select>
+
+<label for="editKeywords">
+Keywords
+</label>
+
+<textarea
+id="editKeywords"
+placeholder="Keyword 1, Keyword 2, Keyword 3"
+></textarea>
+
+<label for="editCover">
+Title Image URL
+</label>
+
+<input
+id="editCover"
+type="text"
+placeholder="images/slug/title.webp"
+>
+
+<label for="editImages">
+Chapter Image URLs
+</label>
+
+<textarea
+id="editImages"
+rows="10"
+placeholder="images/slug/001.webp
+images/slug/002.webp"
+></textarea>
+
+button type="submit" class="green">
+Update Chapter
+</button>
+
+<div
+id="editorStatus"
+class="status"
+></div>
+
+</form>
+
+</div>
+
 <!-- SITE SETTINGS -->
 
 <div class="panel">
@@ -547,6 +641,7 @@ Cancel
 <script src="../site.config.js"></script>
 <script src="admin.js"></script>
 <script src="site-settings.js"></script>
+<script src="editor.js"></script>
 
 </body>
 </html>
