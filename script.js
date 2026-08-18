@@ -443,23 +443,81 @@ function renderReader(post){
 
   readerImages.innerHTML =
     images.map(
-      (src,index) =>
-        `<img
-          src="${escapeAttr(src)}"
-          alt="${escapeAttr(
-            post.title
-          )} 第${escapeAttr(
-            post.chapter
-          )}話 ${String(
-            index + 1
-          ).padStart(3,"0")}"
-          loading="${
-            index < 2
-              ? "eager"
-              : "lazy"
-          }"
-        >`
+      (src,index) => {
+
+        let html =
+          `<img
+            src="${escapeAttr(src)}"
+            alt="${escapeAttr(
+              post.title
+            )} 第${escapeAttr(
+              post.chapter
+            )}話 ${String(
+              index + 1
+            ).padStart(3,"0")}"
+            loading="${
+              index < 2
+                ? "eager"
+                : "lazy"
+            }"
+          >`;
+
+        if(index === 2){
+          html += `
+            <div class="ad-slot ad-728">
+              <div data-ad="728x90"></div>
+            </div>
+          `;
+        }
+
+        if(index === 5){
+          html += `
+            <div class="ad-slot ad-468">
+              <div data-ad="468x60"></div>
+            </div>
+          `;
+        }
+
+        if(index === 8){
+          html += `
+            <div class="ad-slot ad-728">
+              <div data-ad="728x90"></div>
+            </div>
+          `;
+        }
+
+        if(index === 11){
+          html += `
+            <div class="ad-slot ad-468">
+              <div data-ad="468x60"></div>
+            </div>
+          `;
+        }
+
+        if(index === 14){
+          html += `
+            <div class="ad-slot ad-728">
+              <div data-ad="728x90"></div>
+            </div>
+          `;
+        }
+
+        if(index === 17){
+          html += `
+            <div class="ad-slot ad-468">
+              <div data-ad="468x60"></div>
+            </div>
+          `;
+        }
+
+        return html;
+
+      }
     ).join("");
+
+  if(window.loadKingdomAds){
+    window.loadKingdomAds();
+  }
 
 
   /*

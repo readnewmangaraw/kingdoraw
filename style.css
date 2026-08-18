@@ -411,3 +411,13 @@ footer [data-site-name]{
   }
 
 }
+
+.ad-468{
+  min-height:60px;
+}
+
+@media(max-width:600px){
+  .ad-468{
+    min-height:60px;
+  }
+}
