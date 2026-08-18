@@ -3,10 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Kingdom Admin</title>
 
 <style>
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
 
 :root{
   --bg:#05080d;
@@ -76,7 +79,9 @@ label{
   font-weight:700;
 }
 
-input,select,textarea{
+input,
+select,
+textarea{
   width:100%;
   padding:12px;
   background:var(--panel2);
@@ -86,7 +91,9 @@ input,select,textarea{
   outline:none;
 }
 
-input:focus,select:focus,textarea:focus{
+input:focus,
+select:focus,
+textarea:focus{
   border-color:var(--blue);
 }
 
@@ -159,6 +166,58 @@ button:disabled{
   line-height:1.5;
 }
 
+.actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:20px;
+}
+
+.hidden{
+  display:none!important;
+}
+
+.repository-info{
+  padding:12px;
+  border:1px solid #203441;
+  background:#080e14;
+  border-radius:7px;
+  color:var(--green);
+  font-family:monospace;
+}
+
+/* TABS */
+
+.admin-tabs{
+  display:flex;
+  gap:10px;
+  margin:20px 0;
+  flex-wrap:wrap;
+}
+
+.admin-tab{
+  background:var(--panel2);
+  color:var(--muted);
+  border:1px solid var(--border);
+  padding:12px 18px;
+}
+
+.admin-tab.active{
+  background:var(--red);
+  color:white;
+  border-color:var(--red);
+}
+
+.tab-content{
+  display:none;
+}
+
+.tab-content.active{
+  display:block;
+}
+
+/* EXISTING CHAPTERS */
+
 .post-list{
   display:grid;
   gap:10px;
@@ -193,18 +252,8 @@ button:disabled{
   overflow:auto;
 }
 
-.actions{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:20px;
-}
-
-.hidden{
-  display:none!important;
-}
-
 @media(max-width:700px){
+
   .grid{
     grid-template-columns:1fr;
   }
@@ -221,33 +270,24 @@ button:disabled{
     align-items:flex-start;
     flex-direction:column;
   }
-}
 
-.repository-info{
-  padding:12px;
-  border:1px solid #203441;
-  background:#080e14;
-  border-radius:7px;
-  color:#39e58c;
-  font-family:monospace;
+  .admin-tab{
+    flex:1;
+  }
+
 }
 </style>
 </head>
 
 <body>
 
-<div class="panel">
-<h2>Repository</h2>
-<div id="repositoryInfo" class="repository-info">
-Repository will be detected automatically.
-</div>
-</div>
-
-
 <div class="container">
 
 <h1>Kingdom Admin</h1>
-<div class="sub">GitHub Manga Publisher</div>
+
+<div class="sub">
+GitHub Manga Publisher
+</div>
 
 
 <!-- GITHUB CONNECTION -->
@@ -259,7 +299,10 @@ Repository will be detected automatically.
 <div class="grid">
 
 <div>
-<label for="githubToken">GitHub Token</label>
+
+<label for="githubToken">
+GitHub Token
+</label>
 
 <input
 id="githubToken"
@@ -272,10 +315,15 @@ autocomplete="off"
 Token is kept only in this browser session.
 Do not save it in the repository.
 </div>
+
 </div>
 
+
 <div>
-<label>Repository</label>
+
+<label>
+Repository
+</label>
 
 <input
 value="readnewmangaraw/kingdoraw"
@@ -283,11 +331,13 @@ readonly
 >
 
 <div class="help">
-Repository is detected automatically from this GitHub Pages site.
-</div>
+Repository is detected automatically.
 </div>
 
 </div>
+
+</div>
+
 
 <div class="actions">
 
@@ -312,324 +362,111 @@ Clear Token
 </div>
 
 
-
-
-
-<div class="panel">
-
-<h2>Edit Existing Chapter</h2>
-
-<form id="editorForm">
-
-<label for="postSelect">
-Chapter
-</label>
-
-<select id="postSelect">
-<option value="">
-Select a chapter to edit
-</option>
-</select>
-
-<label for="editTitle">
-Title
-</label>
-
-<input
-id="editTitle"
-type="text"
-required
->
-
-<label for="editChapter">
-Chapter
-</label>
-
-<input
-id="editChapter"
-type="text"
-required
->
-
-<label for="editLanguage">
-Language
-</label>
-
-<select id="editLanguage">
-<option value="Japanese">
-Japanese
-</option>
-
-<option value="English">
-English
-</option>
-</select>
-
-<label for="editKeywords">
-Keywords
-</label>
-
-<textarea
-id="editKeywords"
-placeholder="Keyword 1, Keyword 2, Keyword 3"
-></textarea>
-
-<label for="editCover">
-Title Image URL
-</label>
-
-<input
-id="editCover"
-type="text"
-placeholder="images/slug/title.webp"
->
-
-<label for="editImages">
-Chapter Image URLs
-</label>
-
-<textarea
-id="editImages"
-rows="10"
-placeholder="images/slug/001.webp
-images/slug/002.webp"
-></textarea>
-
-<button type="submit" class="green">
-Update Chapter
-</button>
-
-<div
-id="editorStatus"
-class="status"
-></div>
-
-</form>
-
-</div>
-
+<!-- REPOSITORY -->
 
 <div class="panel">
 
-<h2>Chapter Image Upload</h2>
+<h2>Repository</h2>
 
-<form id="uploadForm">
-
-<label for="uploadTitle">
-Title
-</label>
-
-<input
-id="uploadTitle"
-type="text"
-placeholder="Kingdom"
-required
+<div
+id="repositoryInfo"
+class="repository-info"
 >
+Repository will be detected automatically.
+</div>
 
-<label for="uploadChapter">
-Chapter
-</label>
+</div>
 
-<input
-id="uploadChapter"
-type="text"
-placeholder="884"
-required
->
 
-<label for="uploadLanguage">
-Language
-</label>
+<!-- TABS -->
 
-<select id="uploadLanguage">
-<option value="Japanese">Japanese</option>
-<option value="English">English</option>
-</select>
-
-<label for="newTitleImage">
-Title Image
-</label>
-
-<input
-id="newTitleImage"
-type="file"
-accept="image/*"
-required
->
-
-<label for="newChapterImages">
-Chapter Images
-</label>
-
-<input
-id="newChapterImages"
-type="file"
-accept="image/*"
-multiple
-required
->
-
-<p class="help">
-Select all chapter pages at once.
-The files will be sorted by filename.
-</p>
-
-<label for="uploadKeywords">
-Keywords
-</label>
-
-<textarea
-id="uploadKeywords"
-placeholder="Kingdom Raw, Kingdom Chapter 884, Kingdom 884"
-></textarea>
+<div class="admin-tabs">
 
 <button
-type="submit"
-class="green"
-id="uploadButton"
+type="button"
+class="admin-tab active"
+data-tab="new-post"
 >
-Publish Chapter
+New Post
 </button>
 
-<div
-id="uploadStatus"
-class="status"
-></div>
-
-</form>
-
-</div>
-
-<!-- SITE SETTINGS -->
-
-<div
-class="panel"
+<button
+type="button"
+class="admin-tab"
+data-tab="update-post"
 >
-
-<h2>Website Settings</h2>
-
-<form id="siteSettingsForm">
-
-<div class="grid">
-
-<div>
-<label for="siteName">
-Website Name
-</label>
-
-<input
-id="siteName"
-type="text"
-placeholder="Kingdom"
-required
->
-</div>
-
-<div>
-<label for="siteNameJa">
-Japanese Website Name
-</label>
-
-<input
-id="siteNameJa"
-type="text"
-placeholder="キングダム"
-required
->
-</div>
-
-<div class="full">
-
-<label for="descriptionJa">
-Japanese SEO Description
-</label>
-
-<textarea
-id="descriptionJa"
-placeholder="キングダム最新話を読むことができます。"
-></textarea>
-
-</div>
-
-</div>
-
-<div class="actions">
+Update Post
+</button>
 
 <button
-type="submit"
-class="green"
+type="button"
+class="admin-tab"
+data-tab="site-settings"
 >
-Save Website Settings
+Site Settings
 </button>
 
 </div>
 
-<div
-id="siteSettingsStatus"
-class="status"
-></div>
 
-</form>
-
-</div>
-
-
-<!-- EXISTING POSTS -->
+<!-- NEW POST TAB -->
 
 <div
-id="postsPanel"
-class="panel hidden"
+id="new-post"
+class="tab-content active"
 >
 
-<h2>Existing Chapters</h2>
 
-<div
-id="postList"
-class="post-list"
->
-Loading...
-</div>
-
-</div>
-
-
-<!-- PUBLISHER -->
+<!-- EXISTING INTERNAL PUBLISHER -->
 
 <div
 id="publisherPanel"
 class="panel hidden"
 >
 
-<h2 id="formTitle">New Chapter</h2>
+<h2 id="formTitle">
+New Chapter
+</h2>
 
 <form id="publisherForm">
 
 <div class="grid">
 
 <div>
-<label for="title">Manga Title</label>
+
+<label for="title">
+Manga Title
+</label>
 
 <input
 id="title"
 required
 placeholder="One Piece"
 >
+
 </div>
 
 
 <div>
-<label for="chapter">Chapter Number</label>
+
+<label for="chapter">
+Chapter Number
+</label>
 
 <input
 id="chapter"
 required
 placeholder="1191"
 >
+
 </div>
 
 
 <div>
-<label for="language">Language</label>
+
+<label for="language">
+Language
+</label>
 
 <select id="language">
 
@@ -642,11 +479,15 @@ English
 </option>
 
 </select>
+
 </div>
 
 
 <div>
-<label for="slug">Slug</label>
+
+<label for="slug">
+Slug
+</label>
 
 <input
 id="slug"
@@ -657,6 +498,7 @@ placeholder="one-piece-1191"
 <div class="help">
 Example: one-piece-1191
 </div>
+
 </div>
 
 
@@ -743,9 +585,357 @@ Cancel
 
 </form>
 
-<div id="publishStatus" class="status"></div>
+<div
+id="publishStatus"
+class="status"
+></div>
 
 </div>
+
+
+<!-- UPLOADER -->
+
+<div class="panel">
+
+<h2>
+Chapter Image Upload
+</h2>
+
+<form id="uploadForm">
+
+<label for="uploadTitle">
+Title
+</label>
+
+<input
+id="uploadTitle"
+type="text"
+placeholder="Kingdom"
+required
+>
+
+
+<label for="uploadChapter">
+Chapter
+</label>
+
+<input
+id="uploadChapter"
+type="text"
+placeholder="884"
+required
+>
+
+
+<label for="uploadLanguage">
+Language
+</label>
+
+<select id="uploadLanguage">
+
+<option value="Japanese">
+Japanese
+</option>
+
+<option value="English">
+English
+</option>
+
+</select>
+
+
+<label for="newTitleImage">
+Title Image
+</label>
+
+<input
+id="newTitleImage"
+type="file"
+accept="image/*"
+required
+>
+
+
+<label for="newChapterImages">
+Chapter Images
+</label>
+
+<input
+id="newChapterImages"
+type="file"
+accept="image/*"
+multiple
+required
+>
+
+<p class="help">
+Select all chapter pages at once.
+The files will be sorted by filename.
+</p>
+
+
+<label for="uploadKeywords">
+Keywords
+</label>
+
+<textarea
+id="uploadKeywords"
+placeholder="Kingdom Raw, Kingdom Chapter 884, Kingdom 884"
+></textarea>
+
+
+<button
+type="submit"
+class="green"
+id="uploadButton"
+>
+Publish Chapter
+</button>
+
+<div
+id="uploadStatus"
+class="status"
+></div>
+
+</form>
+
+</div>
+
+</div>
+
+
+<!-- UPDATE POST TAB -->
+
+<div
+id="update-post"
+class="tab-content"
+>
+
+
+<!-- EDITOR -->
+
+<div class="panel">
+
+<h2>
+Edit Existing Chapter
+</h2>
+
+<form id="editorForm">
+
+<label for="postSelect">
+Chapter
+</label>
+
+<select id="postSelect">
+
+<option value="">
+Select a chapter to edit
+</option>
+
+</select>
+
+
+<label for="editTitle">
+Title
+</label>
+
+<input
+id="editTitle"
+type="text"
+required
+>
+
+
+<label for="editChapter">
+Chapter
+</label>
+
+<input
+id="editChapter"
+type="text"
+required
+>
+
+
+<label for="editLanguage">
+Language
+</label>
+
+<select id="editLanguage">
+
+<option value="Japanese">
+Japanese
+</option>
+
+<option value="English">
+English
+</option>
+
+</select>
+
+
+<label for="editKeywords">
+Keywords
+</label>
+
+<textarea
+id="editKeywords"
+placeholder="Keyword 1, Keyword 2, Keyword 3"
+></textarea>
+
+
+<label for="editCover">
+Title Image URL
+</label>
+
+<input
+id="editCover"
+type="text"
+placeholder="images/slug/title.webp"
+>
+
+
+<label for="editImages">
+Chapter Image URLs
+</label>
+
+<textarea
+id="editImages"
+rows="10"
+placeholder="images/slug/001.webp
+images/slug/002.webp"
+></textarea>
+
+
+<button
+type="submit"
+class="green"
+>
+Update Chapter
+</button>
+
+
+<div
+id="editorStatus"
+class="status"
+></div>
+
+</form>
+
+</div>
+
+
+<!-- INTERNAL POSTS PANEL -->
+
+<div
+id="postsPanel"
+class="panel hidden"
+>
+
+<h2>
+Existing Chapters
+</h2>
+
+<div
+id="postList"
+class="post-list"
+>
+Loading...
+</div>
+
+</div>
+
+</div>
+
+
+<!-- SITE SETTINGS TAB -->
+
+<div
+id="site-settings"
+class="tab-content"
+>
+
+<div class="panel">
+
+<h2>
+Website Settings
+</h2>
+
+<form id="siteSettingsForm">
+
+<div class="grid">
+
+<div>
+
+<label for="siteName">
+Website Name
+</label>
+
+<input
+id="siteName"
+type="text"
+placeholder="Kingdom"
+required
+>
+
+</div>
+
+
+<div>
+
+<label for="siteNameJa">
+Japanese Website Name
+</label>
+
+<input
+id="siteNameJa"
+type="text"
+placeholder="キングダム"
+required
+>
+
+</div>
+
+
+<div class="full">
+
+<label for="descriptionJa">
+Japanese SEO Description
+</label>
+
+<textarea
+id="descriptionJa"
+placeholder="キングダム最新話を読むことができます。"
+></textarea>
+
+</div>
+
+</div>
+
+
+<div class="actions">
+
+<button
+type="submit"
+class="green"
+>
+Save Website Settings
+</button>
+
+</div>
+
+
+<div
+id="siteSettingsStatus"
+class="status"
+></div>
+
+</form>
+
+</div>
+
+</div>
+
 
 </div>
 
@@ -759,10 +949,45 @@ Cancel
 <script src="uploader.js?v=1787076361"></script>
 
 
+<script>
+document.addEventListener("DOMContentLoaded", function(){
 
+  const tabs =
+    document.querySelectorAll(".admin-tab");
 
+  const panels =
+    document.querySelectorAll(".tab-content");
 
+  tabs.forEach(function(tab){
+
+    tab.addEventListener("click", function(){
+
+      const target =
+        tab.getAttribute("data-tab");
+
+      tabs.forEach(function(item){
+        item.classList.remove("active");
+      });
+
+      panels.forEach(function(panel){
+        panel.classList.remove("active");
+      });
+
+      tab.classList.add("active");
+
+      const panel =
+        document.getElementById(target);
+
+      if(panel){
+        panel.classList.add("active");
+      }
+
+    });
+
+  });
+
+});
+</script>
 
 </body>
 </html>
-
