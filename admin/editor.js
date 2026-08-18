@@ -692,13 +692,42 @@ async function saveEditorPosts(
   message
 ) {
 
+  /*
+   * Always fetch the latest posts.json first.
+   * GitHub requires the current SHA when updating
+   * an existing file.
+   */
+
   const existing =
     await window.githubApi(
       "/contents/data/posts.json?ref=main"
     );
 
+  if (!existing.ok) {
+
+    let details = "";
+
+    try {
+      details = await existing.text();
+    } catch {}
+
+    throw new Error(
+      `Unable to read posts.json (${existing.status}): ${details}`
+    );
+
+  }
+
   const data =
     await existing.json();
+
+  if (!data.sha) {
+
+    throw new Error(
+      "GitHub did not return the posts.json SHA."
+    );
+
+  }
+
 
   const content =
     JSON.stringify(
@@ -707,35 +736,55 @@ async function saveEditorPosts(
       2
     );
 
-  await window.githubApi(
-    "/contents/data/posts.json",
-    {
 
-      method: "PUT",
+  const response =
+    await window.githubApi(
+      "/contents/data/posts.json",
+      {
 
-      headers: {
-        "Content-Type":
-          "application/json"
-      },
+        method: "PUT",
 
-      body:
-        JSON.stringify({
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
 
-          message,
+        body:
+          JSON.stringify({
 
-          content:
-            base64Encode(content),
+            message,
 
-          sha:
-            data.sha,
+            content:
+              base64Encode(content),
 
-          branch:
-            "main"
+            sha:
+              data.sha,
 
-        })
+            branch:
+              "main"
 
-    }
-  );
+          })
+
+      }
+    );
+
+
+  if (!response.ok) {
+
+    let details = "";
+
+    try {
+      details = await response.text();
+    } catch {}
+
+    throw new Error(
+      `Unable to update posts.json (${response.status}): ${details}`
+    );
+
+  }
+
+
+  return await response.json();
 
 }
 
