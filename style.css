@@ -375,3 +375,39 @@ footer [data-site-name]{
   }
 
 }
+
+/* ADS */
+
+.ad-slot{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  margin:24px auto;
+  overflow:hidden;
+  min-height:10px;
+}
+
+.ad-slot > div{
+  max-width:100%;
+}
+
+.ad-300{
+  min-height:250px;
+}
+
+.ad-728{
+  min-height:90px;
+}
+
+@media(max-width:600px){
+
+  .ad-300{
+    min-height:250px;
+  }
+
+  .ad-728{
+    min-height:90px;
+  }
+
+}
