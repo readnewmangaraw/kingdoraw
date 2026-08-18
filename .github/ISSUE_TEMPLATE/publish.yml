@@ -1,0 +1,8 @@
+---
+name: Manga Publisher
+about: Publish a manga chapter through GitHub Actions
+title: "[PUBLISH] "
+labels: publish
+---
+
+<!-- Publisher payload will be generated automatically. -->
