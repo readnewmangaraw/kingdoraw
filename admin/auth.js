@@ -1,72 +1,87 @@
 (function(){
 
-const AUTH = window.KINGDOM_AUTH = window.KINGDOM_AUTH || {};
-
-const TOKEN_KEY = "kingdom_github_token";
-
-AUTH.getToken = function(){
-  return localStorage.getItem(TOKEN_KEY) || "";
-};
-
-AUTH.setToken = function(token){
-  localStorage.setItem(TOKEN_KEY, token);
-};
-
-AUTH.clearToken = function(){
-  localStorage.removeItem(TOKEN_KEY);
-};
-
-AUTH.getRepository = function(){
-
-  const host =
-    location.hostname;
-
-  const path =
-    location.pathname;
-
-  if(!host.endsWith(".github.io")){
-    throw new Error("Repository not detected.");
+  if(window.KINGDOM_AUTH_INITIALIZED){
+    return;
   }
 
-  const owner =
-    host.split(".")[0];
+  window.KINGDOM_AUTH_INITIALIZED = true;
 
-  const parts =
-    path
-      .replace(/^\/+/, "")
-      .split("/")
-      .filter(Boolean);
+  const AUTH = {};
 
-  const repo =
-    parts[0];
+  const TOKEN_KEY =
+    "kingdom_github_token";
 
-  if(!owner || !repo){
-    throw new Error("Repository not detected.");
-  }
-
-  return {
-    owner,
-    repo
+  AUTH.getToken = function(){
+    return localStorage.getItem(TOKEN_KEY) || "";
   };
-};
 
-AUTH.githubApi = async function(path, options = {}){
+  AUTH.setToken = function(token){
+    localStorage.setItem(TOKEN_KEY, token);
+  };
 
-  const token =
-    AUTH.getToken();
+  AUTH.clearToken = function(){
+    localStorage.removeItem(TOKEN_KEY);
+  };
 
-  if(!token){
-    throw new Error(
-      "GitHub token is missing."
-    );
-  }
+  AUTH.getRepository = function(){
 
-  const repository =
-    AUTH.getRepository();
+    const host =
+      location.hostname;
 
-  const response =
-    await fetch(
-      `https://api.github.com/repos/${repository.owner}/${repository.repo}${path}`,
+    const parts =
+      location.pathname
+        .replace(/^\/+/, "")
+        .split("/")
+        .filter(Boolean);
+
+    if(!host.endsWith(".github.io")){
+      throw new Error(
+        "Repository not detected."
+      );
+    }
+
+    const owner =
+      host.split(".")[0];
+
+    const repo =
+      parts[0];
+
+    if(!owner || !repo){
+      throw new Error(
+        "Repository not detected."
+      );
+    }
+
+    return {
+      owner: owner,
+      repo: repo
+    };
+  };
+
+
+  AUTH.githubApi = async function(
+    path,
+    options = {}
+  ){
+
+    const token =
+      AUTH.getToken();
+
+    if(!token){
+      throw new Error(
+        "GitHub token is missing."
+      );
+    }
+
+    const repository =
+      AUTH.getRepository();
+
+    return fetch(
+      "https://api.github.com/repos/" +
+      repository.owner +
+      "/" +
+      repository.repo +
+      path,
       {
         ...options,
 
@@ -75,7 +90,7 @@ AUTH.githubApi = async function(path, options = {}){
             "application/vnd.github+json",
 
           "Authorization":
-            `Bearer ${token}`,
+            "Bearer " + token,
 
           "X-GitHub-Api-Version":
             "2022-11-28",
@@ -84,230 +99,218 @@ AUTH.githubApi = async function(path, options = {}){
         }
       }
     );
-
-  if(!response.ok){
-
-    let message =
-      response.statusText;
-
-    try{
-
-      const data =
-        await response.json();
-
-      if(data.message){
-        message =
-          data.message;
-      }
-
-    }catch{}
-
-    throw new Error(
-      `GitHub API ${response.status}: ${message}`
-    );
-  }
-
-  return response;
-};
+  };
 
 
-window.githubApi =
-  AUTH.githubApi;
+  window.KINGDOM_AUTH =
+    AUTH;
+
+  window.githubApi =
+    AUTH.githubApi;
 
 
-/* --------------------------------
-   LOGIN UI
--------------------------------- */
+  function showStatus(
+    message,
+    type
+  ){
 
-function initLogin(){
+    const element =
+      document.getElementById(
+        "connectionStatus"
+      );
 
-  const tokenInput =
-    document.getElementById(
-      "githubToken"
-    );
+    if(!element){
+      return;
+    }
 
-  const connectBtn =
-    document.getElementById(
-      "connectBtn"
-    );
+    element.textContent =
+      message;
 
-  const logoutBtn =
-    document.getElementById(
-      "logoutBtn"
-    );
-
-  const status =
-    document.getElementById(
-      "connectionStatus"
-    );
-
-
-  if(!tokenInput || !connectBtn){
-    return;
+    element.className =
+      "status " + type;
   }
 
 
-  async function connect(){
+  function initLogin(){
 
-    const token =
-      tokenInput.value.trim();
+    const tokenInput =
+      document.getElementById(
+        "githubToken"
+      );
 
-    if(!token){
+    const connectBtn =
+      document.getElementById(
+        "connectBtn"
+      );
 
-      if(status){
-        status.textContent =
-          "Enter your GitHub token.";
-        status.className =
-          "status error";
-      }
+    const logoutBtn =
+      document.getElementById(
+        "logoutBtn"
+      );
 
+    if(!tokenInput || !connectBtn){
       return;
     }
 
 
-    try{
+    connectBtn.onclick =
+      async function(){
 
-      AUTH.setToken(token);
+        const token =
+          tokenInput.value.trim();
 
-      const response =
-        await AUTH.githubApi(
-          "/contents/data/posts.json?ref=main"
-        );
+        if(!token){
 
-      if(!response.ok){
-        throw new Error(
-          "GitHub connection failed."
-        );
-      }
+          showStatus(
+            "Enter your GitHub token.",
+            "error"
+          );
 
-
-      if(status){
-
-        status.textContent =
-          "✓ GitHub connected successfully.";
-
-        status.className =
-          "status success";
-
-      }
+          return;
+        }
 
 
-      tokenInput.value = "";
+        try{
 
-      connectBtn.classList.add(
-        "hidden"
-      );
+          AUTH.setToken(token);
+
+          const response =
+            await AUTH.githubApi(
+              "/contents/data/posts.json?ref=main"
+            );
+
+          if(!response.ok){
+
+            const data =
+              await response.json()
+                .catch(() => ({}));
+
+            throw new Error(
+              "GitHub API " +
+              response.status +
+              ": " +
+              (data.message || "Request failed")
+            );
+
+          }
 
 
-      if(logoutBtn){
+          tokenInput.value = "";
 
-        logoutBtn.classList.remove(
+          connectBtn.classList.add(
+            "hidden"
+          );
+
+          if(logoutBtn){
+
+            logoutBtn.classList.remove(
+              "hidden"
+            );
+
+          }
+
+          showStatus(
+            "✓ GitHub connected successfully.",
+            "success"
+          );
+
+          window.dispatchEvent(
+            new Event(
+              "github-connected"
+            )
+          );
+
+        }catch(error){
+
+          AUTH.clearToken();
+
+          showStatus(
+            error.message,
+            "error"
+          );
+
+        }
+
+      };
+
+
+    if(logoutBtn){
+
+      logoutBtn.onclick =
+        function(){
+
+          AUTH.clearToken();
+
+          location.reload();
+
+        };
+
+    }
+
+
+    if(AUTH.getToken()){
+
+      AUTH.githubApi(
+        "/contents/data/posts.json?ref=main"
+      )
+      .then(function(response){
+
+        if(!response.ok){
+          throw new Error(
+            "GitHub session expired."
+          );
+        }
+
+        connectBtn.classList.add(
           "hidden"
         );
 
-      }
+        if(logoutBtn){
 
+          logoutBtn.classList.remove(
+            "hidden"
+          );
 
-      window.dispatchEvent(
-        new Event("github-connected")
-      );
+        }
 
-    }catch(error){
+        showStatus(
+          "✓ GitHub session restored.",
+          "success"
+        );
 
-      AUTH.clearToken();
+        window.dispatchEvent(
+          new Event(
+            "github-connected"
+          )
+        );
 
-      if(status){
+      })
+      .catch(function(){
 
-        status.textContent =
-          error.message;
+        AUTH.clearToken();
 
-        status.className =
-          "status error";
-
-      }
+      });
 
     }
 
   }
 
 
-  connectBtn.onclick =
-    connect;
+  if(
+    document.readyState ===
+    "loading"
+  ){
 
+    document.addEventListener(
+      "DOMContentLoaded",
+      initLogin,
+      {once:true}
+    );
 
-  if(logoutBtn){
+  }else{
 
-    logoutBtn.onclick = function(){
-
-      AUTH.clearToken();
-
-      location.reload();
-
-    };
-
-  }
-
-
-  if(AUTH.getToken()){
-
-    AUTH.githubApi(
-      "/contents/data/posts.json?ref=main"
-    )
-    .then(function(){
-
-      if(status){
-
-        status.textContent =
-          "✓ GitHub session restored.";
-
-        status.className =
-          "status success";
-
-      }
-
-      connectBtn.classList.add(
-        "hidden"
-      );
-
-      if(logoutBtn){
-
-        logoutBtn.classList.remove(
-          "hidden"
-        );
-
-      }
-
-      window.dispatchEvent(
-        new Event("github-connected")
-      );
-
-    })
-    .catch(function(){
-
-      AUTH.clearToken();
-
-    });
+    initLogin();
 
   }
-
-}
-
-
-if(
-  document.readyState ===
-  "loading"
-){
-
-  document.addEventListener(
-    "DOMContentLoaded",
-    initLogin,
-    {once:true}
-  );
-
-}else{
-
-  initLogin();
-
-}
 
 })();
