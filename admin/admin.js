@@ -181,26 +181,6 @@ async function github(path, options = {}) {
 
 }
 
-  if (!response.ok) {
-
-    let message = response.statusText;
-
-    try {
-      const data = await response.json();
-
-      if (data.message) {
-        message = data.message;
-      }
-
-    } catch {}
-
-    throw new Error(
-      `GitHub API ${response.status}: ${message}`
-    );
-  }
-
-  return response;
-}
 
 
 /*
