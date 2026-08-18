@@ -35,34 +35,35 @@ function clearToken(){
 
 function detectRepository(){
 
-  const host =
-    location.hostname;
+  const host = location.hostname;
+  const path = location.pathname;
 
-  const parts =
-    location.pathname
-      .split("/")
-      .filter(Boolean);
-
-  if(
-    host.endsWith(".github.io") &&
-    parts.length >= 1
-  ){
-
-    return {
-      owner:
-        host.replace(".github.io",""),
-
-      repo:
-        parts[0]
-    };
-
+  if(!host.endsWith(".github.io")){
+    throw new Error(
+      "This admin must run on GitHub Pages."
+    );
   }
 
-  throw new Error(
-    "GitHub repository could not be detected."
-  );
-}
+  const owner =
+    host.replace(".github.io", "");
 
+  const parts =
+    path.split("/").filter(Boolean);
+
+  if(!parts.length){
+    throw new Error(
+      "GitHub repository could not be detected."
+    );
+  }
+
+  const repo =
+    parts[0];
+
+  return {
+    owner,
+    repo
+  };
+}
 
 const repository =
   detectRepository();
