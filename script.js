@@ -238,28 +238,67 @@ ROUTING
 ==============================
 */
 
+const basePath = "/kingdoraw/";
+
 function getSlugFromPath(){
 
-  const base =
-    "/kingdoraw/";
+  let path =
+    location.pathname;
 
-  if(!location.pathname.startsWith(base)){
+  if(path === basePath){
     return null;
   }
 
-  const slug =
-    location.pathname.slice(base.length).replace(/^\/+|\/+$/g, "");
-
-  if(!slug){
+  if(!path.startsWith(basePath)){
     return null;
   }
 
-  return decodeURIComponent(slug);
+  return decodeURIComponent(
+    path
+      .slice(basePath.length)
+      .replace(/^\/+|\/+$/g, "")
+  );
+
+}
+
+
+function cleanOldHash(){
+
+  if(location.hash){
+
+    const oldHash =
+      location.hash.replace(/^#\/?/, "");
+
+    if(oldHash){
+
+      const cleanPath =
+        basePath +
+        oldHash;
+
+      history.replaceState(
+        {},
+        "",
+        cleanPath
+      );
+
+    }else{
+
+      history.replaceState(
+        {},
+        "",
+        basePath
+      );
+
+    }
+
+  }
 
 }
 
 
 function handleRoute(){
+
+  cleanOldHash();
 
   const slug =
     getSlugFromPath();
@@ -289,6 +328,7 @@ function handleRoute(){
   showReader(post);
 
 }
+
 
 function showHome(){
 
@@ -326,7 +366,6 @@ function showReader(post){
   );
 
 }
-
 
 /*
 ==============================
