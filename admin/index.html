@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kingdom Admin</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#05080d;color:#edf7ff;font-family:Arial,sans-serif}
+    .wrap{max-width:900px;margin:auto;padding:30px 18px}
+    h1{margin:0 0 8px;color:#ff304f}
+    .sub{color:#91a5b5;margin-bottom:30px}
+    .panel{background:#0b1118;border:1px solid #1b2935;border-radius:14px;padding:24px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    label{display:block;margin-bottom:7px;font-weight:700}
+    input,select,textarea{width:100%;padding:12px;border-radius:8px;border:1px solid #263746;background:#101820;color:#fff}
+    textarea{min-height:100px;resize:vertical}
+    .full{grid-column:1/-1}
+    .upload{border:1px dashed #38bdf8;padding:18px;border-radius:10px}
+    button{border:0;border-radius:8px;padding:12px 20px;background:#ff304f;color:white;font-weight:800;cursor:pointer}
+    button:hover{opacity:.9}
+    .status{margin-top:18px;padding:12px;border-radius:8px;background:#101820;color:#39e58c}
+    .preview{margin-top:25px}
+    .preview img{max-width:220px;max-height:250px;object-fit:cover;border-radius:8px}
+    @media(max-width:700px){.grid{grid-template-columns:1fr}.full{grid-column:auto}}
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>Kingdom Admin</h1>
+  <div class="sub">Create and manage manga chapters</div>
+
+  <div class="panel">
+    <form id="publisherForm">
+
+      <div class="grid">
+
+        <div>
+          <label for="title">Title</label>
+          <input id="title" required placeholder="One Piece">
+        </div>
+
+        <div>
+          <label for="chapter">Chapter</label>
+          <input id="chapter" required placeholder="1191">
+        </div>
+
+        <div>
+          <label for="language">Language</label>
+          <select id="language">
+            <option value="English">English</option>
+            <option value="Japanese">日本語</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="slug">Slug</label>
+          <input id="slug" placeholder="one-piece-1191">
+        </div>
+
+        <div class="full">
+          <label for="keywords">Keywords</label>
+          <textarea id="keywords" placeholder="One Piece 1191, One Piece Chapter 1191, One Piece Raw"></textarea>
+        </div>
+
+        <div class="full">
+          <label>Title Image</label>
+          <div class="upload">
+            <input id="coverFile" type="file" accept="image/*">
+          </div>
+        </div>
+
+        <div class="full">
+          <label>Chapter Images</label>
+          <div class="upload">
+            <input id="chapterFiles" type="file" accept="image/*" multiple>
+          </div>
+        </div>
+
+        <div class="full">
+          <button type="submit">Prepare Chapter</button>
+        </div>
+
+      </div>
+
+    </form>
+
+    <div id="status"></div>
+    <div id="preview" class="preview"></div>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>
