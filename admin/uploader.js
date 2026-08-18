@@ -96,19 +96,40 @@ async function uploadGitHubFile(
   message
 ){
 
-  const existing =
-    await githubApi(
-      `/contents/${path}?ref=main`
-    );
-
   let sha = null;
 
-  if(existing.ok){
+  /*
+   * File may not exist yet.
+   * A 404 here is normal for a new image.
+   */
+  try{
+
+    const existing =
+      await githubApi(
+        `/contents/${path}?ref=main`
+      );
 
     const data =
       await existing.json();
 
-    sha = data.sha;
+    sha =
+      data.sha;
+
+  }catch(error){
+
+    /*
+     * Ignore 404 because it means
+     * the file is being created for
+     * the first time.
+     */
+    if(
+      !String(error.message)
+        .includes("404")
+    ){
+
+      throw error;
+
+    }
 
   }
 
@@ -124,8 +145,15 @@ async function uploadGitHubFile(
   };
 
 
+  /*
+   * Existing file requires SHA.
+   * New file does not.
+   */
   if(sha){
-    body.sha = sha;
+
+    body.sha =
+      sha;
+
   }
 
 
@@ -134,9 +162,9 @@ async function uploadGitHubFile(
       `/contents/${path}`,
       {
 
-        method:"PUT",
+        method: "PUT",
 
-        headers:{
+        headers: {
           "Content-Type":
             "application/json"
         },
