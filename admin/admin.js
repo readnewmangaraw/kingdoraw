@@ -1,6 +1,39 @@
-const OWNER = "readnewmangaraw";
-const REPO = "kingdoraw";
 const BRANCH = "main";
+
+function getRepositoryInfo() {
+  const host = location.hostname;
+  const path = location.pathname;
+
+  const parts = host.split(".");
+
+  if (host.endsWith(".github.io") && parts.length >= 3) {
+    const owner = parts[0];
+
+    const cleanPath = path
+      .replace(/^\/+/, "")
+      .split("/")[0];
+
+    if (cleanPath) {
+      return {
+        owner,
+        repo: cleanPath
+      };
+    }
+
+    return {
+      owner,
+      repo: `${owner}.github.io`
+    };
+  }
+
+  throw new Error(
+    "Unable to detect the GitHub repository."
+  );
+}
+
+const REPOSITORY = getRepositoryInfo();
+const OWNER = REPOSITORY.owner;
+const REPO = REPOSITORY.repo;
 
 const tokenInput = document.getElementById("githubToken");
 const connectBtn = document.getElementById("connectBtn");
