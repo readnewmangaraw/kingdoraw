@@ -1,17 +1,5 @@
 const BRANCH = "main";
 
-const tokenInput =
-  document.getElementById("githubToken");
-
-const connectBtn =
-  document.getElementById("connectBtn");
-
-const logoutBtn =
-  document.getElementById("logoutBtn");
-
-const connectionStatus =
-  document.getElementById("connectionStatus");
-
 const postsPanel =
   document.getElementById("postsPanel");
 
